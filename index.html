@@ -5,13 +5,178 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>D&D Character Sheet</title>
 <style>
-/* keep all your previous CSS unchanged */
+body {
+  font-family: 'Georgia', serif;
+  margin: 0;
+  padding: 40px 0 0 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  transition: background-image 0.5s ease-in-out;
+  color: #fff;
+  min-height: 100vh;
+  text-shadow: 1px 1px 3px #000;
+  display: flex;
+}
+.left-panel {
+  width: 33.33%;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.right-panel {
+  width: 66.66%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+h1 {
+  text-align: center;
+  text-shadow: 2px 2px 4px #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+.profile-pic {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid purple;
+  object-fit: cover;
+}
+label { display: block; margin-top: 8px; font-weight: bold; }
+input, textarea, select {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+  border-radius: 5px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  outline: none;
+  box-shadow: 0 0 3px rgba(0,0,0,0.4);
+  box-sizing: border-box;
+}
+textarea { resize: vertical; }
+.stats-row { display: flex; gap: 10px; margin-top: 10px; }
+.stats-row > div { flex: 1; }
+.tab-buttons { display: flex; gap: 10px; margin-bottom: 10px; }
+.tab-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.tab-buttons button.active { background: rgba(255,255,255,0.4); }
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 10px;
+  overflow: hidden;
+}
+.wallpaper-buttons { display: flex; gap: 10px; margin-top: 10px; }
+.wallpaper-buttons button {
+  flex: 1;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.wallpaper-buttons button:hover { background: rgba(255,255,255,0.4); }
+.bg-fields { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.bg-backstory { flex: 1; margin-top: 10px; }
+#actionsContainer, #spellsContainer, #inventoryContainer { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.action-section { display: flex; gap: 6px; align-items: center; transition: height 0.18s ease; }
+.action-section input { flex: 1; min-width: 0; cursor: pointer; }
+.delete-action-btn {
+  flex: 0 0 60px;
+  background: rgba(255,0,0,0.5);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.delete-action-btn:hover { background: rgba(255,0,0,0.8); }
+#addActionBtn, #addSpellBtn, #addInventoryBtn {
+  margin-top: 10px;
+  padding: 6px;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  cursor: pointer;
+}
+#addActionBtn:hover, #addSpellBtn:hover, #addInventoryBtn:hover { background: rgba(255,255,255,0.4); }
+.action-headers { display: flex; gap: 10px; font-weight: bold; margin-bottom: 4px; }
+.action-headers div { flex: 1; padding-right: 6px; text-align:center; }
+.inventory-grid { display:flex; gap:6px; align-items:center; }
+.inventory-grid input { flex:1; min-width:0; }
 </style>
 </head>
 <body>
+
 <div class="left-panel">
-  <!-- same as before: profile pic and stats -->
+  <h1>
+    <img src="./Images/Character.png" class="profile-pic" alt="Profile Pic">
+    D&D Character Sheet
+  </h1>
+
+  <!-- Stats -->
+  <div class="stats-row">
+    <div><label>HP</label><input id="hp" type="number"></div>
+    <div><label>AC</label><input id="ac" type="number"></div>
+    <div><label>Speed</label><input id="speed" type="number"></div>
+    <div><label>Initiative</label><input id="initiative" type="number"></div>
+  </div>
+
+  <div class="stats-row">
+    <div><label>STR</label><input id="strength" type="number"></div>
+    <div><label>DEX</label><input id="dexterity" type="number"></div>
+    <div><label>CON</label><input id="constitution" type="number"></div>
+    <div><label>INT</label><input id="intelligence" type="number"></div>
+    <div><label>WIS</label><input id="wisdom"></div>
+    <div><label>CHA</label><input id="charisma"></div>
+  </div>
+
+  <div class="stats-list">
+    <div class="stats-row"><label>Acrobatics</label><input id="acrobatics"></div>
+    <div class="stats-row"><label>Animal Handling</label><input id="animalHandling"></div>
+    <div class="stats-row"><label>Arcana</label><input id="arcana"></div>
+    <div class="stats-row"><label>Athletics</label><input id="athletics"></div>
+    <div class="stats-row"><label>Deception</label><input id="deception"></div>
+    <div class="stats-row"><label>History</label><input id="history"></div>
+    <div class="stats-row"><label>Insight</label><input id="insight"></div>
+    <div class="stats-row"><label>Intimidation</label><input id="intimidation"></div>
+    <div class="stats-row"><label>Investigation</label><input id="investigation"></div>
+    <div class="stats-row"><label>Medicine</label><input id="medicine"></div>
+    <div class="stats-row"><label>Nature</label><input id="nature"></div>
+    <div class="stats-row"><label>Perception</label><input id="perception"></div>
+    <div class="stats-row"><label>Performance</label><input id="performance"></div>
+    <div class="stats-row"><label>Persuasion</label><input id="persuasion"></div>
+    <div class="stats-row"><label>Religion</label><input id="religion"></div>
+    <div class="stats-row"><label>Sleight of Hand</label><input id="sleightOfHand"></div>
+    <div class="stats-row"><label>Stealth</label><input id="stealth"></div>
+    <div class="stats-row"><label>Survival</label><input id="survival"></div>
+    <div class="stats-row"><label>Hunger</label><input id="hunger"></div>
+  </div>
 </div>
+
 <div class="right-panel">
   <div class="tab-buttons">
     <button class="tab-btn active" data-tab="actions">Actions</button>
@@ -19,109 +184,205 @@
     <button class="tab-btn" data-tab="inventory">Inventory</button>
     <button class="tab-btn" data-tab="background">Background</button>
   </div>
-  <div class="tab-content" id="tabContent"></div>
-  <!-- Wallpaper selector same as before -->
+
+  <!-- Tab containers -->
+  <div class="tab-content" id="tabContent">
+    <div id="actionsContainer"></div>
+    <div id="spellsContainer" style="display:none;"></div>
+    <div id="inventoryContainer" style="display:none;"></div>
+    <div id="backgroundContainer" style="display:none;"></div>
+  </div>
+
+  <!-- Wallpaper section -->
+  <div class="section">
+    <label><b>Background Wallpaper</b></label>
+    <select id="wallpaperSelect">
+      <option value="./Images/Img1.webp">Arcane accident</option>
+      <option value="./Images/Img2.avif">Sorceror's training</option>
+      <option value="./Images/Img3.jpg">Barbarian's carnage</option>
+      <option value="./Images/Img4.jpg">The long ride</option>
+      <option value="./Images/Img5.webp">Death of darkness</option>
+      <option value="./Images/Img6.jpg">Ceaseless rage</option>
+      <option value="./Images/Img7.avif">The white shadow</option>
+      <option value="./Images/Img8.webp">The broken</option>
+      <option value="./Images/Img9.jpg">The silent rain</option>
+      <option value="./Images/Img10.jpg">Siege</option>
+      <option value="./Images/Img11.jpg">The unwary</option>
+      <option value="./Images/Img12.jpg">The league of assassins</option>
+    </select>
+    <div class="wallpaper-buttons">
+      <button id="prevWallpaper">Previous</button>
+      <button id="nextWallpaper">Next</button>
+    </div>
+  </div>
 </div>
 
-<script src="https://www.gstatic.com/firebasejs/10.6.2/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.6.2/firebase-database.js"></script>
-<script>
-// --- Firebase Setup ---
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDMeSWp-UbFv_jYstUhbB1kkP-Ite-IHM8",
   authDomain: "dnd-caeldos.firebaseapp.com",
   databaseURL: "https://dnd-caeldos-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "dnd-caeldos",
-  storageBucket: "dnd-caeldos.firebasestorage.app",
+  storageBucket: "dnd-caeldos.appspot.com",
   messagingSenderId: "940131839058",
   appId: "1:940131839058:web:2484beb5ffad8fcfd3438b"
 };
-const app = firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-// --- Wallpaper logic (same as your working code) ---
-const wallpaperSelect = document.getElementById('wallpaperSelect');
-const wallpapers = Array.from(wallpaperSelect.options).map(o=>o.value);
-let currentWallpaperIndex = 0;
-firebase.database().ref('wallpaper').once('value').then(snap=>{
-  const val = snap.val();
-  if(val && wallpapers.includes(val)){
-    document.body.style.backgroundImage = `url(${val})`;
-    wallpaperSelect.value = val;
-    currentWallpaperIndex = wallpapers.indexOf(val);
-  } else document.body.style.backgroundImage = `url(${wallpapers[0]})`;
+// --- Helpers ---
+function saveField(id, value) { set(ref(db, 'fields/' + id), value); }
+async function loadField(id) { const snapshot = await get(child(ref(db), 'fields/' + id)); return snapshot.exists() ? snapshot.val() : ''; }
+
+// --- Wallpaper ---
+const wallpaperSelect=document.getElementById('wallpaperSelect');
+const wallpapers=Array.from(wallpaperSelect.options).map(o=>o.value);
+const prevButton=document.getElementById('prevWallpaper');
+const nextButton=document.getElementById('nextWallpaper');
+let currentWallpaperIndex=0;
+
+window.addEventListener('load', async ()=>{
+  // load wallpaper
+  const saved = await loadField('wallpaper');
+  if(saved && wallpapers.includes(saved)){
+    document.body.style.backgroundImage=`url(${saved})`;
+    wallpaperSelect.value = saved;
+    currentWallpaperIndex = wallpapers.indexOf(saved);
+  } else {
+    document.body.style.backgroundImage=`url(${wallpapers[0]})`;
+  }
+  // load stats
+  document.querySelectorAll('.left-panel input').forEach(async input=>{
+    const val = await loadField(input.id); 
+    if(val) input.value=val;
+    input.addEventListener('input',()=>saveField(input.id,input.value));
+  });
+  // load tab data
+  loadTabData('actions');
+  loadTabData('spells');
+  loadTabData('inventory');
+  loadTabData('background');
 });
 
-// --- Tabs ---
-const tabButtons = document.querySelectorAll('.tab-btn');
-const tabContent = document.getElementById('tabContent');
-const tabData = {
-  actions:`<div class="action-headers"><div>Name</div><div>Range</div><div>Hit</div><div>Damage type</div><div>Damage</div><div>Notes</div><div></div></div><div id="actionsContainer" style="flex:1;"></div><button id="addActionBtn">+ Add Action</button>`,
-  spells:`<div class="action-headers"><div>Name</div><div>Range</div><div>Hit</div><div>Damage type</div><div>Damage</div><div>Notes</div><div></div></div><div id="spellsContainer" style="flex:1;"></div><button id="addSpellBtn">+ Add Spell</button>`,
-  inventory:`<div class="inventory-headers"><div>Quantity</div><div>Name</div><div>Description</div></div><div id="inventoryContainer" style="flex:1;"></div><button id="addInventoryBtn">+ Add Item</button>`,
-  background:`<div class="bg-fields">...same as before...</div>`
-};
+// wallpaper buttons
+wallpaperSelect.addEventListener('change',()=>{ updateWallpaper(wallpaperSelect.value); });
+prevButton.addEventListener('click',()=>{ nextWallpaper(-1); });
+nextButton.addEventListener('click',()=>{ nextWallpaper(1); });
 
-// --- Creation Functions ---
-function createActionSection(a){ /* same as before */ }
-function createSpellSection(s){ return createActionSection(s); }
-function createInventorySection(item={quantity:'',name:'',description:''}){
-  const div = document.createElement('div'); div.classList.add('inventory-section');
-  ['quantity','name','description'].forEach((f,i)=>{
-    const input=document.createElement('input'); input.value=item[f]||''; input.placeholder=['Quantity','Name','Description'][i];
-    input.addEventListener('input', saveInventory); div.appendChild(input);
+function updateWallpaper(value){
+  document.body.style.backgroundImage=`url(${value})`;
+  saveField('wallpaper',value);
+  currentWallpaperIndex=wallpapers.indexOf(value);
+}
+function nextWallpaper(delta){
+  currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length;
+  const newVal=wallpapers[currentWallpaperIndex];
+  wallpaperSelect.value=newVal;
+  updateWallpaper(newVal);
+}
+
+// --- Tabs ---
+const tabButtons=document.querySelectorAll('.tab-btn');
+tabButtons.forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('#tabContent > div').forEach(d=>d.style.display='none');
+  document.getElementById(btn.dataset.tab + 'Container').style.display='flex';
+  tabButtons.forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}));
+
+// --- Actions/Spells/Inventory creation ---
+function createActionElement(data, saveFunc){
+  const div=document.createElement('div'); div.classList.add('action-section');
+  ['name','range','hit','type','damage','notes'].forEach((f,i)=>{
+    const input=document.createElement('input');
+    input.value=data[f]||'';
+    input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
+    input.addEventListener('input',()=>saveFunc());
+    div.appendChild(input);
   });
-  const delBtn = document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
-  delBtn.addEventListener('click',()=>{div.remove(); saveInventory();});
-  div.appendChild(delBtn);
+  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
+  del.addEventListener('click',()=>{ div.remove(); saveFunc(); });
+  div.appendChild(del);
   return div;
 }
 
-// --- Save Functions ---
-function saveActions(){ const data=[]; document.querySelectorAll('.action-section').forEach(d=>{
-  const i=d.querySelectorAll('input'); data.push({name:i[0].value,range:i[1].value,hit:i[2].value,type:i[3].value,damage:i[4].value,notes:i[5].value});
-}); db.ref('actions').set(data);}
-function saveSpells(){ const data=[]; document.querySelectorAll('.action-section').forEach(d=>{
-  const i=d.querySelectorAll('input'); data.push({name:i[0].value,range:i[1].value,hit:i[2].value,type:i[3].value,damage:i[4].value,notes:i[5].value});
-}); db.ref('spells').set(data);}
-function saveInventory(){ const data=[]; document.querySelectorAll('.inventory-section').forEach(d=>{
-  const i=d.querySelectorAll('input'); data.push({quantity:i[0].value,name:i[1].value,description:i[2].value});
-}); db.ref('inventory').set(data);}
-function saveBackground(){ document.querySelectorAll('#tabContent input,#tabContent textarea').forEach(el=>{
-  db.ref('background/'+el.id).set(el.value);
-});}
+function createInventoryElement(item){
+  const div=document.createElement('div'); div.classList.add('inventory-grid');
+  ['quantity','name','description'].forEach(f=>{
+    const input=document.createElement('input');
+    input.value=item[f]||'';
+    input.placeholder=f.charAt(0).toUpperCase()+f.slice(1);
+    input.addEventListener('input',saveInventory);
+    div.appendChild(input);
+  });
+  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
+  del.addEventListener('click',()=>{ div.remove(); saveInventory(); });
+  div.appendChild(del);
+  return div;
+}
 
-// --- Switch Tab ---
-function switchTab(tab){
-  tabContent.innerHTML = tabData[tab];
-  tabButtons.forEach(b=>b.classList.remove('active'));
-  document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-
-  if(tab==='actions'){
-    const container = document.getElementById('actionsContainer'); const btn = document.getElementById('addActionBtn');
-    db.ref('actions').once('value').then(snap=>{ container.innerHTML=''; const saved = snap.val()||[]; saved.length ? saved.forEach(a=>container.appendChild(createActionSection(a))) : container.appendChild(createActionSection()); });
-    btn.addEventListener('click',()=>{ container.appendChild(createActionSection()); saveActions(); });
+// --- Load tab data ---
+async function loadTabData(tab){
+  if(tab==='actions' || tab==='spells'){
+    const snapshot = await get(child(ref(db), tab));
+    const container=document.getElementById(tab+'Container'); container.innerHTML='';
+    const data = snapshot.exists() ? snapshot.val() : [];
+    (data.length ? data : [{}]).forEach(d=>container.appendChild(createActionElement(d, ()=>saveTabData(tab))));
   }
-  else if(tab==='spells'){
-    const container = document.getElementById('spellsContainer'); const btn = document.getElementById('addSpellBtn');
-    db.ref('spells').once('value').then(snap=>{ container.innerHTML=''; const saved = snap.val()||[]; saved.length ? saved.forEach(s=>container.appendChild(createSpellSection(s))) : container.appendChild(createSpellSection()); });
-    btn.addEventListener('click',()=>{ container.appendChild(createSpellSection()); saveSpells(); });
+  if(tab==='inventory'){
+    const snapshot = await get(child(ref(db), 'inventory'));
+    const container=document.getElementById('inventoryContainer'); container.innerHTML='';
+    const data = snapshot.exists() ? snapshot.val() : [];
+    (data.length ? data : [{}]).forEach(d=>container.appendChild(createInventoryElement(d)));
   }
-  else if(tab==='inventory'){
-    const container = document.getElementById('inventoryContainer'); const btn = document.getElementById('addInventoryBtn');
-    db.ref('inventory').once('value').then(snap=>{ container.innerHTML=''; const saved = snap.val()||[]; saved.length ? saved.forEach(i=>container.appendChild(createInventorySection(i))) : container.appendChild(createInventorySection()); });
-    btn.addEventListener('click',()=>{ container.appendChild(createInventorySection()); saveInventory(); });
-  }
-  else if(tab==='background'){
-    document.querySelectorAll('#tabContent input,#tabContent textarea').forEach(el=>{
-      db.ref('background/'+el.id).once('value').then(snap=>{ el.value = snap.val()||''; });
-      el.addEventListener('input',saveBackground);
+  if(tab==='background'){
+    const fields = ['bgName','bgRace','bgClass','bgGender','bgSize','bgHeight','bgFaith','bgAge','bgWeight','bgLanguages','bgBackstory'];
+    fields.forEach(async id=>{
+      const val = await loadField(id);
+      const el=document.getElementById('backgroundContainer').querySelector('#'+id);
+      if(el) el.value=val;
+      if(el) el.addEventListener('input',()=>saveField(id,el.value));
     });
   }
 }
 
-tabButtons.forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
-window.addEventListener('load',()=>switchTab('actions'));
+// --- Save tab data ---
+function saveTabData(tab){
+  const container=document.getElementById(tab+'Container');
+  const data = Array.from(container.querySelectorAll('.action-section')).map(div=>{
+    const inputs = div.querySelectorAll('input');
+    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
+  });
+  set(ref(db, tab), data);
+}
+
+function saveInventory(){
+  const container=document.getElementById('inventoryContainer');
+  const data = Array.from(container.querySelectorAll('.inventory-grid')).map(div=>{
+    const inputs=div.querySelectorAll('input');
+    return {quantity:inputs[0].value,name:inputs[1].value,description:inputs[2].value};
+  });
+  set(ref(db,'inventory'),data);
+}
+
+// --- Buttons ---
+document.getElementById('addActionBtn').addEventListener('click',()=>{
+  const container=document.getElementById('actionsContainer');
+  container.appendChild(createActionElement({},()=>saveTabData('actions')));
+});
+document.getElementById('addSpellBtn').addEventListener('click',()=>{
+  const container=document.getElementById('spellsContainer');
+  container.appendChild(createActionElement({},()=>saveTabData('spells')));
+});
+document.getElementById('addInventoryBtn').addEventListener('click',()=>{
+  const container=document.getElementById('inventoryContainer');
+  container.appendChild(createInventoryElement({}));
+});
 </script>
 </body>
 </html>
