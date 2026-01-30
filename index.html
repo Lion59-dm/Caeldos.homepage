@@ -1,3 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>D&D Character Sheet</title>
+<style>
+body {
+  font-family: 'Georgia', serif;
+  margin: 0;
+  padding: 40px 0 0 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  transition: background-image 0.5s ease-in-out;
+  color: #fff;
+  min-height: 100vh;
+  text-shadow: 1px 1px 3px #000;
+  display: flex;
+}
+.left-panel { width: 33.33%; padding: 20px; box-sizing: border-box; overflow-y: auto; }
+.right-panel { width: 66.66%; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; }
+h1 { text-align: center; text-shadow: 2px 2px 4px #000; display: flex; align-items: center; justify-content: center; gap: 15px; }
+.profile-pic { width: 60px; height: 60px; border-radius: 50%; border: 3px solid purple; object-fit: cover; }
+label { display: block; margin-top: 8px; font-weight: bold; }
+input, textarea, select { width: 100%; padding: 6px; margin-top: 4px; border-radius: 5px; border: none; background: rgba(255,255,255,0.15); color: #fff; outline: none; box-shadow: 0 0 3px rgba(0,0,0,0.4); box-sizing: border-box; }
+textarea { resize: vertical; }
+.stats-row { display: flex; gap: 10px; margin-top: 10px; }
+.stats-row > div { flex: 1; }
+.tab-buttons { display: flex; gap: 10px; margin-bottom: 10px; }
+.tab-buttons button { flex: 1; padding: 10px; border: none; border-radius: 6px; background: rgba(255,255,255,0.2); color: #fff; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+.tab-buttons button.active { background: rgba(255,255,255,0.4); }
+.tab-content { flex: 1; display: flex; flex-direction: column; background: rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; overflow: hidden; }
+.wallpaper-buttons { display: flex; gap: 10px; margin-top: 10px; }
+.wallpaper-buttons button { flex: 1; background: rgba(255,255,255,0.2); color: #fff; border: none; border-radius: 6px; padding: 8px 12px; cursor: pointer; transition: background 0.3s; }
+.wallpaper-buttons button:hover { background: rgba(255,255,255,0.4); }
+.bg-fields { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.bg-backstory { flex: 1; margin-top: 10px; }
+#actionsContainer, #spellsContainer { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.action-section { display: flex; gap: 6px; align-items: center; transition: height 0.18s ease; }
+.action-section input { flex: 1; min-width: 0; cursor: pointer; }
+.delete-action-btn { flex: 0 0 60px; background: rgba(255,0,0,0.5); border: none; border-radius: 4px; color: #fff; cursor: pointer; padding: 4px 8px; }
+.delete-action-btn:hover { background: rgba(255,0,0,0.8); }
+#addActionBtn, #addSpellBtn { margin-top: 10px; padding: 6px; border: none; border-radius: 5px; background: rgba(255,255,255,0.2); color: #fff; cursor: pointer; }
+#addActionBtn:hover, #addSpellBtn:hover { background: rgba(255,255,255,0.4); }
+.action-headers { display: flex; gap: 100px; font-weight: bold; margin-bottom: 4px; }
+.action-headers div { padding-right: 6px; }
+</style>
+</head>
+<body>
+
+<div class="left-panel">
+  <h1>
+    <img src="./Images/Character.png" class="profile-pic" alt="Profile Pic">
+    D&D Character Sheet
+  </h1>
+
+  <div class="stats-row">
+    <div><label>HP</label><input id="hp" type="number"></div>
+    <div><label>AC</label><input id="ac" type="number"></div>
+    <div><label>Speed</label><input id="speed" type="number"></div>
+    <div><label>Initiative</label><input id="initiative" type="number"></div>
+  </div>
+
+  <div class="stats-row">
+    <div><label>STR</label><input id="strength" type="number"></div>
+    <div><label>DEX</label><input id="dexterity" type="number"></div>
+    <div><label>CON</label><input id="constitution" type="number"></div>
+    <div><label>INT</label><input id="intelligence" type="number"></div>
+    <div><label>WIS</label><input id="wisdom"></div>
+    <div><label>CHA</label><input id="charisma"></div>
+  </div>
+
+  <div class="stats-list">
+    <div class="stats-row"><label>Acrobatics</label><input id="acrobatics"></div>
+    <div class="stats-row"><label>Animal Handling</label><input id="animalHandling"></div>
+    <div class="stats-row"><label>Arcana</label><input id="arcana"></div>
+    <div class="stats-row"><label>Athletics</label><input id="athletics"></div>
+    <div class="stats-row"><label>Deception</label><input id="deception"></div>
+    <div class="stats-row"><label>History</label><input id="history"></div>
+    <div class="stats-row"><label>Insight</label><input id="insight"></div>
+    <div class="stats-row"><label>Intimidation</label><input id="intimidation"></div>
+    <div class="stats-row"><label>Investigation</label><input id="investigation"></div>
+    <div class="stats-row"><label>Medicine</label><input id="medicine"></div>
+    <div class="stats-row"><label>Nature</label><input id="nature"></div>
+    <div class="stats-row"><label>Perception</label><input id="perception"></div>
+    <div class="stats-row"><label>Performance</label><input id="performance"></div>
+    <div class="stats-row"><label>Persuasion</label><input id="persuasion"></div>
+    <div class="stats-row"><label>Religion</label><input id="religion"></div>
+    <div class="stats-row"><label>Sleight of Hand</label><input id="sleightOfHand"></div>
+    <div class="stats-row"><label>Stealth</label><input id="stealth"></div>
+    <div class="stats-row"><label>Survival</label><input id="survival"></div>
+    <div class="stats-row"><label>Hunger</label><input id="hunger"></div>
+  </div>
+</div>
+
+<div class="right-panel">
+  <div class="tab-buttons">
+    <button class="tab-btn active" data-tab="actions">Actions</button>
+    <button class="tab-btn" data-tab="spells">Spells</button>
+    <button class="tab-btn" data-tab="inventory">Inventory</button>
+    <button class="tab-btn" data-tab="background">Background</button>
+  </div>
+  <div class="tab-content" id="tabContent"></div>
+
+  <div class="section">
+    <label><b>Background Wallpaper</b></label>
+    <select id="wallpaperSelect">
+      <option value="./Images/Img1.webp">Arcane accident</option>
+      <option value="./Images/Img2.avif">Sorceror's training</option>
+      <option value="./Images/Img3.jpg">Barbarian's carnage</option>
+      <option value="./Images/Img4.jpg">The long ride</option>
+      <option value="./Images/Img5.webp">Death of darkness</option>
+      <option value="./Images/Img6.jpg">Ceaseless rage</option>
+      <option value="./Images/Img7.avif">The white shadow</option>
+      <option value="./Images/Img8.webp">The broken</option>
+      <option value="./Images/Img9.jpg">The silent rain</option>
+      <option value="./Images/Img10.jpg">Siege</option>
+      <option value="./Images/Img11.jpg">The unwary</option>
+      <option value="./Images/Img12.jpg">The league of assassins</option>
+    </select>
+    <div class="wallpaper-buttons">
+      <button id="prevWallpaper">Previous</button>
+      <button id="nextWallpaper">Next</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase + Functionality -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
@@ -7,31 +137,48 @@ const firebaseConfig = {
   authDomain: "dnd-caeldos.firebaseapp.com",
   databaseURL: "https://dnd-caeldos-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "dnd-caeldos",
-  storageBucket: "dnd-caeldos.firebasedestorage.app",
+  storageBucket: "dnd-caeldos.appspot.com",
   messagingSenderId: "940131839058",
   appId: "1:940131839058:web:2484beb5ffad8fcfd3438b"
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// --- Left Panel Inputs ---
-document.querySelectorAll('.left-panel input').forEach(el=>{
-  const saved = localStorage.getItem(el.id); 
-  if(saved) el.value = saved;
-  el.addEventListener('input', ()=> {
-    localStorage.setItem(el.id, el.value);
-    set(ref(db, 'inputs/'+el.id), el.value);
-  });
-  // Firebase real-time sync
-  onValue(ref(db, 'inputs/'+el.id), snapshot=>{
-    if(snapshot.exists() && snapshot.val() !== el.value) el.value = snapshot.val();
-  });
+// Wallpaper
+const wallpaperSelect = document.getElementById('wallpaperSelect');
+const wallpapers = Array.from(wallpaperSelect.options).map(o=>o.value);
+const prevButton = document.getElementById('prevWallpaper');
+const nextButton = document.getElementById('nextWallpaper');
+let currentWallpaperIndex = 0;
+
+function updateWallpaper(delta){
+  currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length;
+  const newWallpaper = wallpapers[currentWallpaperIndex];
+  wallpaperSelect.value=newWallpaper;
+  document.body.style.backgroundImage = `url(${newWallpaper})`;
+  localStorage.setItem('wallpaper',newWallpaper);
+  set(ref(db,'wallpaper'),newWallpaper);
+}
+wallpaperSelect.addEventListener('change',()=>{
+  const wallpaper=wallpaperSelect.value;
+  document.body.style.backgroundImage=`url(${wallpaper})`;
+  localStorage.setItem('wallpaper',wallpaper);
+  set(ref(db,'wallpaper'),wallpaper);
+  currentWallpaperIndex = wallpapers.indexOf(wallpaper);
+});
+prevButton.addEventListener('click',()=>updateWallpaper(-1));
+nextButton.addEventListener('click',()=>updateWallpaper(1));
+onValue(ref(db,'wallpaper'), snap=>{
+  if(snap.exists()){
+    document.body.style.backgroundImage = `url(${snap.val()})`;
+    wallpaperSelect.value = snap.val();
+    currentWallpaperIndex = wallpapers.indexOf(snap.val());
+  }
 });
 
-// --- Tab system ---
+// Tab system & dynamic content
 const tabButtons = document.querySelectorAll('.tab-btn');
 const tabContent = document.getElementById('tabContent');
-
 const tabData = {
   actions: `<div class="action-headers"><div>Name</div><div>Range</div><div>Hit</div><div>Damage type</div><div>Damage</div><div>Notes</div><div></div></div><div id="actionsContainer" style="flex:1;"></div><button id="addActionBtn">+ Add Action</button>`,
   spells: `<div class="action-headers"><div>Name</div><div>Range</div><div>Hit</div><div>Damage type</div><div>Damage</div><div>Notes</div><div></div></div><div id="spellsContainer" style="flex:1;"></div><button id="addSpellBtn">+ Add Spell</button>`,
@@ -46,114 +193,121 @@ const tabData = {
   </div>`
 };
 
+// Utility to sync any input
+function syncInput(id){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const dbRef = ref(db,'inputs/'+id);
+  el.addEventListener('input', ()=> set(dbRef, el.value));
+  onValue(dbRef, snap=>{
+    if(snap.exists() && snap.val() !== el.value) el.value = snap.val();
+  });
+  const saved = localStorage.getItem(id);
+  if(saved) el.value = saved;
+}
+
+// --- Actions, Spells, Inventory creation functions ---
+function createActionSection(action={name:'',range:'',hit:'',type:'',damage:'',notes:''}){
+  const div = document.createElement('div'); div.classList.add('action-section');
+  ['name','range','hit','type','damage','notes'].forEach((field,i)=>{
+    const input = document.createElement('input'); input.value=action[field]||''; input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
+    input.addEventListener('input',()=>saveActions());
+    div.appendChild(input);
+  });
+  const delBtn=document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
+  delBtn.addEventListener('click',()=>{div.remove(); saveActions();});
+  div.appendChild(delBtn);
+  return div;
+}
+function createSpellSection(spell){ return createActionSection(spell); }
+function createInventorySection(item={name:''}){
+  const div = document.createElement('div'); div.classList.add('action-section');
+  const input = document.createElement('input'); input.value=item.name||''; input.placeholder='Item Name';
+  input.addEventListener('input',saveInventory);
+  div.appendChild(input);
+  const delBtn = document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
+  delBtn.addEventListener('click',()=>{div.remove(); saveInventory();});
+  div.appendChild(delBtn);
+  return div;
+}
+
+// --- Save functions (local + firebase) ---
+function saveActions(){ 
+  const actions = Array.from(document.querySelectorAll('#actionsContainer .action-section')).map(div=>{
+    const inputs = div.querySelectorAll('input'); 
+    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
+  });
+  localStorage.setItem('actionsList',JSON.stringify(actions));
+  set(ref(db,'actionsList'),actions);
+}
+function saveSpells(){
+  const spells = Array.from(document.querySelectorAll('#spellsContainer .action-section')).map(div=>{
+    const inputs = div.querySelectorAll('input'); 
+    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
+  });
+  localStorage.setItem('spellsList',JSON.stringify(spells));
+  set(ref(db,'spellsList'),spells);
+}
+function saveInventory(){
+  const items = Array.from(document.querySelectorAll('#inventoryContainer input')).map(i=>i.value);
+  localStorage.setItem('inventoryList',JSON.stringify(items));
+  set(ref(db,'inventoryList'),items);
+}
+
+// --- Tab switching ---
 function switchTab(tab){
   tabContent.innerHTML = tabData[tab];
   tabButtons.forEach(btn => btn.classList.remove('active'));
   document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-
-  if(tab==='actions') initActions();
-  else if(tab==='spells') initSpells();
-  else if(tab==='inventory') initInventory();
-  else if(tab==='background') initBackground();
+  
+  if(tab==='actions'){ initActions(); }
+  else if(tab==='spells'){ initSpells(); }
+  else if(tab==='inventory'){ initInventory(); }
+  else if(tab==='background'){ initBackground(); }
 }
 
-// --- Firebase + LocalStorage sync helpers ---
-function syncInput(id){
-  const el = document.getElementById(id);
-  if(!el) return;
-  const dbRef = ref(db, 'inputs/'+id);
-  onValue(dbRef, snap=>{
-    if(snap.exists() && snap.val() !== el.value) el.value = snap.val();
-  });
-  el.addEventListener('input', ()=> set(dbRef, el.value));
-}
-
-// --- Initialize tabs ---
+// --- Initialize tab content ---
 function initBackground(){
-  document.querySelectorAll('#tabContent input, #tabContent textarea').forEach(el=>{
-    const saved = localStorage.getItem(el.id); if(saved) el.value = saved;
-    el.addEventListener('input', ()=> {
-      localStorage.setItem(el.id, el.value);
-      set(ref(db, 'inputs/'+el.id), el.value);
-    });
-    syncInput(el.id);
-  });
+  document.querySelectorAll('#tabContent input,#tabContent textarea').forEach(el=>syncInput(el.id));
 }
-
 function initActions(){
-  const container = document.getElementById('actionsContainer');
-  const btn = document.getElementById('addActionBtn');
-  const saved = JSON.parse(localStorage.getItem('actionsList')||'[]');
-  container.innerHTML = '';
-  saved.length ? saved.forEach(a=>container.appendChild(createActionSection(a))) : container.appendChild(createActionSection());
-  btn.addEventListener('click', ()=>{
-    container.appendChild(createActionSection());
-    saveActions();
+  const container=document.getElementById('actionsContainer');
+  const btn=document.getElementById('addActionBtn');
+  btn.addEventListener('click',()=>{container.appendChild(createActionSection()); saveActions();});
+  onValue(ref(db,'actionsList'),snap=>{
+    container.innerHTML='';
+    if(snap.exists()) snap.val().forEach(a=>container.appendChild(createActionSection(a)));
+    else container.appendChild(createActionSection());
   });
-  loadActionsFromFirebase();
 }
-
 function initSpells(){
-  const container = document.getElementById('spellsContainer');
-  const btn = document.getElementById('addSpellBtn');
-  const saved = JSON.parse(localStorage.getItem('spellsList')||'[]');
-  container.innerHTML = '';
-  saved.length ? saved.forEach(s=>container.appendChild(createSpellSection(s))) : container.appendChild(createSpellSection());
-  btn.addEventListener('click', ()=>{
-    container.appendChild(createSpellSection());
-    saveSpells();
+  const container=document.getElementById('spellsContainer');
+  const btn=document.getElementById('addSpellBtn');
+  btn.addEventListener('click',()=>{container.appendChild(createSpellSection()); saveSpells();});
+  onValue(ref(db,'spellsList'),snap=>{
+    container.innerHTML='';
+    if(snap.exists()) snap.val().forEach(s=>container.appendChild(createSpellSection(s)));
+    else container.appendChild(createSpellSection());
   });
-  loadSpellsFromFirebase();
 }
-
 function initInventory(){
-  const container = document.getElementById('inventoryContainer');
-  const btn = document.getElementById('addInventoryBtn');
-  const saved = JSON.parse(localStorage.getItem('inventoryList')||'[]');
-  container.innerHTML = '';
-  saved.length ? saved.forEach(i=>container.appendChild(createInventorySection({name:i}))) : container.appendChild(createInventorySection());
-  btn.addEventListener('click', ()=>{
-    container.appendChild(createInventorySection());
-    saveInventory();
-  });
-  loadInventoryFromFirebase();
-}
-
-// --- Firebase syncing for dynamic lists ---
-function loadActionsFromFirebase(){
-  const dbRef = ref(db,'actionsList');
-  onValue(dbRef, snap=>{
-    const data = snap.val();
-    if(!data) return;
-    const container = document.getElementById('actionsContainer');
-    container.innerHTML = '';
-    data.forEach(a=>container.appendChild(createActionSection(a)));
+  const container=document.getElementById('inventoryContainer');
+  const btn=document.getElementById('addInventoryBtn');
+  btn.addEventListener('click',()=>{container.appendChild(createInventorySection()); saveInventory();});
+  onValue(ref(db,'inventoryList'),snap=>{
+    container.innerHTML='';
+    if(snap.exists()) snap.val().forEach(i=>container.appendChild(createInventorySection({name:i})));
+    else container.appendChild(createInventorySection());
   });
 }
 
-function loadSpellsFromFirebase(){
-  const dbRef = ref(db,'spellsList');
-  onValue(dbRef, snap=>{
-    const data = snap.val();
-    if(!data) return;
-    const container = document.getElementById('spellsContainer');
-    container.innerHTML = '';
-    data.forEach(s=>container.appendChild(createSpellSection(s)));
-  });
-}
+// Tab button listeners
+tabButtons.forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
+switchTab('actions');
 
-function loadInventoryFromFirebase(){
-  const dbRef = ref(db,'inventoryList');
-  onValue(dbRef, snap=>{
-    const data = snap.val();
-    if(!data) return;
-    const container = document.getElementById('inventoryContainer');
-    container.innerHTML = '';
-    data.forEach(i=>container.appendChild(createInventorySection({name:i})));
-  });
-}
+// --- Left Panel Stats sync ---
+document.querySelectorAll('.left-panel input').forEach(el=>syncInput(el.id));
 
-// --- Tab buttons ---
-tabButtons.forEach(btn => btn.addEventListener('click', ()=>switchTab(btn.dataset.tab)));
-switchTab('actions'); // default
 </script>
+</body>
+</html>
