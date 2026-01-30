@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>D&D Character Sheet</title>
 <style>
 body {
@@ -13,46 +13,138 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed;
+  transition: background-image 0.5s ease-in-out;
   color: #fff;
   min-height: 100vh;
   text-shadow: 1px 1px 3px #000;
   display: flex;
 }
-.left-panel { width: 33.33%; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-.right-panel { width: 66.66%; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden; }
-h1 { display:flex; align-items:center; justify-content:center; gap:15px; }
-.profile-pic { width:60px;height:60px;border-radius:50%;border:3px solid purple;object-fit:cover; }
-label { display:block;margin-top:8px;font-weight:bold; }
-input,textarea,select { width:100%; padding:6px; margin-top:4px; border-radius:5px; border:none; background:rgba(255,255,255,0.15); color:#fff; outline:none; box-shadow:0 0 3px rgba(0,0,0,0.4); box-sizing:border-box; }
+.left-panel {
+  width: 33.33%;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
+}
+.right-panel {
+  width: 66.66%;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+h1 {
+  text-align: center;
+  text-shadow: 2px 2px 4px #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+}
+.profile-pic {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 3px solid purple;
+  object-fit: cover;
+}
+label { display: block; margin-top: 8px; font-weight: bold; }
+input, textarea, select {
+  width: 100%;
+  padding: 6px;
+  margin-top: 4px;
+  border-radius: 5px;
+  border: none;
+  background: rgba(255,255,255,0.15);
+  color: #fff;
+  outline: none;
+  box-shadow: 0 0 3px rgba(0,0,0,0.4);
+  box-sizing: border-box;
+}
 textarea { resize: vertical; }
-.stats-row { display:flex; gap:10px; margin-top:10px; }
-.stats-row > div { flex:1; }
-.tab-buttons { display:flex; gap:10px; margin-bottom:10px; }
-.tab-buttons button { flex:1; padding:10px; border:none; border-radius:6px; background:rgba(255,255,255,0.2); color:#fff; font-weight:bold; cursor:pointer; transition:0.3s; }
-.tab-buttons button.active { background:rgba(255,255,255,0.4); }
-.tab-content { flex:1; display:flex; flex-direction:column; background:rgba(0,0,0,0.2); border-radius:8px; padding:10px; overflow:auto; }
-.wallpaper-buttons { display:flex; gap:10px; margin-top:10px; }
-.wallpaper-buttons button { flex:1; background:rgba(255,255,255,0.2); color:#fff; border:none; border-radius:6px; padding:8px 12px; cursor:pointer; transition:0.3s; }
-.wallpaper-buttons button:hover { background:rgba(255,255,255,0.4); }
-.action-section { display:flex; gap:6px; align-items:center; transition:height 0.18s ease; }
-.action-section input { flex:1; min-width:0; }
-.delete-action-btn { flex:0 0 60px; background:rgba(255,0,0,0.5); border:none; border-radius:4px; color:#fff; cursor:pointer; padding:4px 8px; }
-.delete-action-btn:hover { background:rgba(255,0,0,0.8); }
-#addActionBtn,#addSpellBtn,#addInventoryBtn { margin-top:10px; padding:6px; border:none; border-radius:5px; background:rgba(255,255,255,0.2); color:#fff; cursor:pointer; }
-#addActionBtn:hover,#addSpellBtn:hover,#addInventoryBtn:hover { background:rgba(255,255,255,0.4); }
-.inventory-headers { display:flex; gap:10px; font-weight:bold; margin-bottom:4px; }
-.inventory-headers div { flex:1; }
+.stats-row { display: flex; gap: 10px; margin-top: 10px; }
+.stats-row > div { flex: 1; }
+.tab-buttons { display: flex; gap: 10px; margin-bottom: 10px; }
+.tab-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.tab-buttons button.active { background: rgba(255,255,255,0.4); }
+.tab-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: rgba(0,0,0,0.2);
+  border-radius: 8px;
+  padding: 10px;
+  overflow: hidden;
+}
+.wallpaper-buttons { display: flex; gap: 10px; margin-top: 10px; }
+.wallpaper-buttons button {
+  flex: 1;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+.wallpaper-buttons button:hover { background: rgba(255,255,255,0.4); }
+.bg-fields { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
+.bg-backstory { flex: 1; margin-top: 10px; }
+#actionsContainer, #spellsContainer, #inventoryContainer { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.action-section { display: flex; gap: 6px; align-items: center; transition: height 0.18s ease; }
+.action-section input { flex: 1; min-width: 0; cursor: pointer; }
+.delete-action-btn {
+  flex: 0 0 60px;
+  background: rgba(255,0,0,0.5);
+  border: none;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.delete-action-btn:hover { background: rgba(255,0,0,0.8); }
+#addActionBtn, #addSpellBtn, #addInventoryBtn {
+  margin-top: 10px;
+  padding: 6px;
+  border: none;
+  border-radius: 5px;
+  background: rgba(255,255,255,0.2);
+  color: #fff;
+  cursor: pointer;
+}
+#addActionBtn:hover, #addSpellBtn:hover, #addInventoryBtn:hover { background: rgba(255,255,255,0.4); }
+.action-headers { display: flex; gap: 10px; font-weight: bold; margin-bottom: 4px; }
+.action-headers div { flex: 1; padding-right: 6px; text-align:center; }
+.inventory-grid { display:flex; gap:6px; align-items:center; }
+.inventory-grid input { flex:1; min-width:0; }
 </style>
 </head>
 <body>
+
 <div class="left-panel">
-  <h1><img src="./Images/Character.png" class="profile-pic" alt="Profile Pic">D&D Character Sheet</h1>
+  <h1>
+    <img src="./Images/Character.png" class="profile-pic" alt="Profile Pic">
+    D&D Character Sheet
+  </h1>
+
+  <!-- Stats -->
   <div class="stats-row">
     <div><label>HP</label><input id="hp" type="number"></div>
     <div><label>AC</label><input id="ac" type="number"></div>
     <div><label>Speed</label><input id="speed" type="number"></div>
     <div><label>Initiative</label><input id="initiative" type="number"></div>
   </div>
+
   <div class="stats-row">
     <div><label>STR</label><input id="strength" type="number"></div>
     <div><label>DEX</label><input id="dexterity" type="number"></div>
@@ -60,6 +152,28 @@ textarea { resize: vertical; }
     <div><label>INT</label><input id="intelligence" type="number"></div>
     <div><label>WIS</label><input id="wisdom"></div>
     <div><label>CHA</label><input id="charisma"></div>
+  </div>
+
+  <div class="stats-list">
+    <div class="stats-row"><label>Acrobatics</label><input id="acrobatics"></div>
+    <div class="stats-row"><label>Animal Handling</label><input id="animalHandling"></div>
+    <div class="stats-row"><label>Arcana</label><input id="arcana"></div>
+    <div class="stats-row"><label>Athletics</label><input id="athletics"></div>
+    <div class="stats-row"><label>Deception</label><input id="deception"></div>
+    <div class="stats-row"><label>History</label><input id="history"></div>
+    <div class="stats-row"><label>Insight</label><input id="insight"></div>
+    <div class="stats-row"><label>Intimidation</label><input id="intimidation"></div>
+    <div class="stats-row"><label>Investigation</label><input id="investigation"></div>
+    <div class="stats-row"><label>Medicine</label><input id="medicine"></div>
+    <div class="stats-row"><label>Nature</label><input id="nature"></div>
+    <div class="stats-row"><label>Perception</label><input id="perception"></div>
+    <div class="stats-row"><label>Performance</label><input id="performance"></div>
+    <div class="stats-row"><label>Persuasion</label><input id="persuasion"></div>
+    <div class="stats-row"><label>Religion</label><input id="religion"></div>
+    <div class="stats-row"><label>Sleight of Hand</label><input id="sleightOfHand"></div>
+    <div class="stats-row"><label>Stealth</label><input id="stealth"></div>
+    <div class="stats-row"><label>Survival</label><input id="survival"></div>
+    <div class="stats-row"><label>Hunger</label><input id="hunger"></div>
   </div>
 </div>
 
@@ -71,26 +185,15 @@ textarea { resize: vertical; }
     <button class="tab-btn" data-tab="background">Background</button>
   </div>
 
-  <div class="tab-content">
+  <!-- Tab containers -->
+  <div class="tab-content" id="tabContent">
     <div id="actionsContainer"></div>
     <div id="spellsContainer" style="display:none;"></div>
-    <div id="inventoryContainer" style="display:none;">
-      <div class="inventory-headers">
-        <div>Quantity</div><div>Name</div><div>Description</div>
-      </div>
-    </div>
-    <div id="backgroundContainer" style="display:none;">
-      <div>
-        <div class="stats-row"><div><label>Name</label><input id="bgName"></div><div><label>Race</label><input id="bgRace"></div></div>
-        <div class="stats-row"><div><label>Class</label><input id="bgClass"></div><div><label>Gender</label><input id="bgGender"></div></div>
-        <div class="stats-row"><div><label>Size</label><input id="bgSize"></div><div><label>Height</label><input id="bgHeight"></div></div>
-        <div class="stats-row"><div><label>Faith</label><input id="bgFaith"></div><div><label>Age</label><input id="bgAge"></div></div>
-        <div class="stats-row"><div><label>Weight</label><input id="bgWeight"></div><div><label>Languages</label><input id="bgLanguages"></div></div>
-        <div><label>Backstory</label><textarea id="bgBackstory" placeholder="Enter your backstory..." style="flex:1;"></textarea></div>
-      </div>
-    </div>
+    <div id="inventoryContainer" style="display:none;"></div>
+    <div id="backgroundContainer" style="display:none;"></div>
   </div>
 
+  <!-- Wallpaper section -->
   <div class="section">
     <label><b>Background Wallpaper</b></label>
     <select id="wallpaperSelect">
@@ -98,6 +201,14 @@ textarea { resize: vertical; }
       <option value="./Images/Img2.avif">Sorceror's training</option>
       <option value="./Images/Img3.jpg">Barbarian's carnage</option>
       <option value="./Images/Img4.jpg">The long ride</option>
+      <option value="./Images/Img5.webp">Death of darkness</option>
+      <option value="./Images/Img6.jpg">Ceaseless rage</option>
+      <option value="./Images/Img7.avif">The white shadow</option>
+      <option value="./Images/Img8.webp">The broken</option>
+      <option value="./Images/Img9.jpg">The silent rain</option>
+      <option value="./Images/Img10.jpg">Siege</option>
+      <option value="./Images/Img11.jpg">The unwary</option>
+      <option value="./Images/Img12.jpg">The league of assassins</option>
     </select>
     <div class="wallpaper-buttons">
       <button id="prevWallpaper">Previous</button>
@@ -106,11 +217,12 @@ textarea { resize: vertical; }
   </div>
 </div>
 
+<!-- Firebase SDK -->
 <script type="module">
-// Firebase setup
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDMeSWp-UbFv_jYstUhbB1kkP-Ite-IHM8",
   authDomain: "dnd-caeldos.firebaseapp.com",
@@ -123,42 +235,154 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Tabs
-const tabs=document.querySelectorAll('.tab-btn');
-const containers={actions:document.getElementById('actionsContainer'),spells:document.getElementById('spellsContainer'),inventory:document.getElementById('inventoryContainer'),background:document.getElementById('backgroundContainer')};
-tabs.forEach(t=>t.addEventListener('click',()=>{Object.values(containers).forEach(c=>c.style.display='none'); containers[t.dataset.tab].style.display='flex'; tabs.forEach(b=>b.classList.remove('active')); t.classList.add('active');}));
+// --- Helpers ---
+function saveField(id, value) { set(ref(db, 'fields/' + id), value); }
+async function loadField(id) { const snapshot = await get(child(ref(db), 'fields/' + id)); return snapshot.exists() ? snapshot.val() : ''; }
 
-// Wallpaper
-const wallpaperSelect=document.getElementById('wallpaperSelect'); const wallpapers=Array.from(wallpaperSelect.options).map(o=>o.value);
-let wpIndex=0; function setWallpaper(){document.body.style.backgroundImage=`url(${wallpapers[wpIndex]})`; localStorage.setItem('wallpaper',wallpapers[wpIndex]); wallpaperSelect.value=wallpapers[wpIndex];}
-wallpaperSelect.addEventListener('change',()=>{wpIndex=wallpapers.indexOf(wallpaperSelect.value); setWallpaper();});
-document.getElementById('prevWallpaper').addEventListener('click',()=>{wpIndex=(wpIndex-1+wallpapers.length)%wallpapers.length; setWallpaper();});
-document.getElementById('nextWallpaper').addEventListener('click',()=>{wpIndex=(wpIndex+1)%wallpapers.length; setWallpaper();});
-window.addEventListener('load',()=>{const saved=localStorage.getItem('wallpaper'); if(saved && wallpapers.includes(saved)) wpIndex=wallpapers.indexOf(saved); setWallpaper();});
+// --- Wallpaper ---
+const wallpaperSelect=document.getElementById('wallpaperSelect');
+const wallpapers=Array.from(wallpaperSelect.options).map(o=>o.value);
+const prevButton=document.getElementById('prevWallpaper');
+const nextButton=document.getElementById('nextWallpaper');
+let currentWallpaperIndex=0;
 
-// Create sections
-function createAction(action={name:'',range:'',hit:'',type:'',damage:'',notes:''}){ const d=document.createElement('div'); d.className='action-section'; ['name','range','hit','type','damage','notes'].forEach((f,i)=>{const input=document.createElement('input'); input.value=action[f]; input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i]; input.addEventListener('input',saveAll); d.appendChild(input);}); const btn=document.createElement('button'); btn.textContent='Delete'; btn.className='delete-action-btn'; btn.onclick=()=>{d.remove();saveAll();}; d.appendChild(btn); return d;}
-function createInventory(item={quantity:'',name:'',description:''}){ const d=document.createElement('div'); d.className='action-section'; ['quantity','name','description'].forEach(f=>{const input=document.createElement('input'); input.value=item[f]; input.placeholder=f.charAt(0).toUpperCase()+f.slice(1); input.addEventListener('input',saveAll); d.appendChild(input);}); const btn=document.createElement('button'); btn.textContent='Delete'; btn.className='delete-action-btn'; btn.onclick=()=>{d.remove();saveAll();}; d.appendChild(btn); return d;}
+window.addEventListener('load', async ()=>{
+  // load wallpaper
+  const saved = await loadField('wallpaper');
+  if(saved && wallpapers.includes(saved)){
+    document.body.style.backgroundImage=`url(${saved})`;
+    wallpaperSelect.value = saved;
+    currentWallpaperIndex = wallpapers.indexOf(saved);
+  } else {
+    document.body.style.backgroundImage=`url(${wallpapers[0]})`;
+  }
+  // load stats
+  document.querySelectorAll('.left-panel input').forEach(async input=>{
+    const val = await loadField(input.id); 
+    if(val) input.value=val;
+    input.addEventListener('input',()=>saveField(input.id,input.value));
+  });
+  // load tab data
+  loadTabData('actions');
+  loadTabData('spells');
+  loadTabData('inventory');
+  loadTabData('background');
+});
 
-// Buttons
-document.getElementById('addActionBtn')?.addEventListener('click',()=>{containers.actions.appendChild(createAction()); saveAll();});
-document.getElementById('addSpellBtn')?.addEventListener('click',()=>{containers.spells.appendChild(createAction()); saveAll();});
-document.getElementById('addInventoryBtn')?.addEventListener('click',()=>{containers.inventory.appendChild(createInventory()); saveAll();});
+// wallpaper buttons
+wallpaperSelect.addEventListener('change',()=>{ updateWallpaper(wallpaperSelect.value); });
+prevButton.addEventListener('click',()=>{ nextWallpaper(-1); });
+nextButton.addEventListener('click',()=>{ nextWallpaper(1); });
 
-// Save/load
-function saveAll(){
-  const saveData={
-    actions:Array.from(containers.actions.querySelectorAll('.action-section')).map(d=>Array.from(d.querySelectorAll('input')).reduce((a,i,j)=>{['name','range','hit','type','damage','notes'][j]?a[['name','range','hit','type','damage','notes'][j]=i.value:a;a; return a;},{})),
-    spells:Array.from(containers.spells.querySelectorAll('.action-section')).map(d=>Array.from(d.querySelectorAll('input')).reduce((a,i,j)=>{['name','range','hit','type','damage','notes'][j]?a[['name','range','hit','type','damage','notes'][j]=i.value:a;a; return a;},{})),
-    inventory:Array.from(containers.inventory.querySelectorAll('.action-section')).map(d=>{const i=d.querySelectorAll('input'); return {quantity:i[0].value,name:i[1].value,description:i[2].value};}),
-    fields:{}
-  };
-  document.querySelectorAll('input,textarea').forEach(el=>{if(el.id) saveData.fields[el.id]=el.value;});
-  set(ref(db),saveData);
+function updateWallpaper(value){
+  document.body.style.backgroundImage=`url(${value})`;
+  saveField('wallpaper',value);
+  currentWallpaperIndex=wallpapers.indexOf(value);
+}
+function nextWallpaper(delta){
+  currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length;
+  const newVal=wallpapers[currentWallpaperIndex];
+  wallpaperSelect.value=newVal;
+  updateWallpaper(newVal);
 }
 
-// Load from Firebase
-onValue(ref(db),snapshot=>{const data=snapshot.val(); if(!data) return; if(data.fields) Object.entries(data.fields).forEach(([k,v])=>{const el=document.getElementById(k); if(el) el.value=v;}); if(data.actions){containers.actions.innerHTML=''; data.actions.forEach(a=>containers.actions.appendChild(createAction(a));} if(data.spells){containers.spells.innerHTML=''; data.spells.forEach(s=>containers.spells.appendChild(createAction(s));} if(data.inventory){containers.inventory.innerHTML=''; data.inventory.forEach(i=>containers.inventory.appendChild(createInventory(i));}});
+// --- Tabs ---
+const tabButtons=document.querySelectorAll('.tab-btn');
+tabButtons.forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('#tabContent > div').forEach(d=>d.style.display='none');
+  document.getElementById(btn.dataset.tab + 'Container').style.display='flex';
+  tabButtons.forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}));
+
+// --- Actions/Spells/Inventory creation ---
+function createActionElement(data, saveFunc){
+  const div=document.createElement('div'); div.classList.add('action-section');
+  ['name','range','hit','type','damage','notes'].forEach((f,i)=>{
+    const input=document.createElement('input');
+    input.value=data[f]||'';
+    input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
+    input.addEventListener('input',()=>saveFunc());
+    div.appendChild(input);
+  });
+  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
+  del.addEventListener('click',()=>{ div.remove(); saveFunc(); });
+  div.appendChild(del);
+  return div;
+}
+
+function createInventoryElement(item){
+  const div=document.createElement('div'); div.classList.add('inventory-grid');
+  ['quantity','name','description'].forEach(f=>{
+    const input=document.createElement('input');
+    input.value=item[f]||'';
+    input.placeholder=f.charAt(0).toUpperCase()+f.slice(1);
+    input.addEventListener('input',saveInventory);
+    div.appendChild(input);
+  });
+  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
+  del.addEventListener('click',()=>{ div.remove(); saveInventory(); });
+  div.appendChild(del);
+  return div;
+}
+
+// --- Load tab data ---
+async function loadTabData(tab){
+  if(tab==='actions' || tab==='spells'){
+    const snapshot = await get(child(ref(db), tab));
+    const container=document.getElementById(tab+'Container'); container.innerHTML='';
+    const data = snapshot.exists() ? snapshot.val() : [];
+    (data.length ? data : [{}]).forEach(d=>container.appendChild(createActionElement(d, ()=>saveTabData(tab))));
+  }
+  if(tab==='inventory'){
+    const snapshot = await get(child(ref(db), 'inventory'));
+    const container=document.getElementById('inventoryContainer'); container.innerHTML='';
+    const data = snapshot.exists() ? snapshot.val() : [];
+    (data.length ? data : [{}]).forEach(d=>container.appendChild(createInventoryElement(d)));
+  }
+  if(tab==='background'){
+    const fields = ['bgName','bgRace','bgClass','bgGender','bgSize','bgHeight','bgFaith','bgAge','bgWeight','bgLanguages','bgBackstory'];
+    fields.forEach(async id=>{
+      const val = await loadField(id);
+      const el=document.getElementById('backgroundContainer').querySelector('#'+id);
+      if(el) el.value=val;
+      if(el) el.addEventListener('input',()=>saveField(id,el.value));
+    });
+  }
+}
+
+// --- Save tab data ---
+function saveTabData(tab){
+  const container=document.getElementById(tab+'Container');
+  const data = Array.from(container.querySelectorAll('.action-section')).map(div=>{
+    const inputs = div.querySelectorAll('input');
+    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
+  });
+  set(ref(db, tab), data);
+}
+
+function saveInventory(){
+  const container=document.getElementById('inventoryContainer');
+  const data = Array.from(container.querySelectorAll('.inventory-grid')).map(div=>{
+    const inputs=div.querySelectorAll('input');
+    return {quantity:inputs[0].value,name:inputs[1].value,description:inputs[2].value};
+  });
+  set(ref(db,'inventory'),data);
+}
+
+// --- Buttons ---
+document.getElementById('addActionBtn').addEventListener('click',()=>{
+  const container=document.getElementById('actionsContainer');
+  container.appendChild(createActionElement({},()=>saveTabData('actions')));
+});
+document.getElementById('addSpellBtn').addEventListener('click',()=>{
+  const container=document.getElementById('spellsContainer');
+  container.appendChild(createActionElement({},()=>saveTabData('spells')));
+});
+document.getElementById('addInventoryBtn').addEventListener('click',()=>{
+  const container=document.getElementById('inventoryContainer');
+  container.appendChild(createInventoryElement({}));
+});
 </script>
 </body>
 </html>
