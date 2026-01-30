@@ -100,7 +100,7 @@ textarea { resize: vertical; }
 .wallpaper-buttons button:hover { background: rgba(255,255,255,0.4); }
 .bg-fields { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
 .bg-backstory { flex: 1; margin-top: 10px; }
-#actionsContainer, #spellsContainer, #inventoryContainer { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+#actionsContainer, #spellsContainer, #inventoryContainer, #backgroundContainer { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
 .action-section { display: flex; gap: 6px; align-items: center; transition: height 0.18s ease; }
 .action-section input { flex: 1; min-width: 0; cursor: pointer; }
 .delete-action-btn {
@@ -186,11 +186,38 @@ textarea { resize: vertical; }
   </div>
 
   <!-- Tab containers -->
-  <div class="tab-content" id="tabContent">
+  <div class="tab-content">
     <div id="actionsContainer"></div>
     <div id="spellsContainer" style="display:none;"></div>
     <div id="inventoryContainer" style="display:none;"></div>
-    <div id="backgroundContainer" style="display:none;"></div>
+    <div id="backgroundContainer" style="display:none; flex-direction:column; gap:10px; overflow-y:auto;">
+      <div class="bg-fields">
+        <div class="stats-row">
+          <div><label>Name</label><input id="bgName"></div>
+          <div><label>Race</label><input id="bgRace"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Class</label><input id="bgClass"></div>
+          <div><label>Gender</label><input id="bgGender"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Size</label><input id="bgSize"></div>
+          <div><label>Height</label><input id="bgHeight"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Faith</label><input id="bgFaith"></div>
+          <div><label>Age</label><input id="bgAge"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Weight</label><input id="bgWeight"></div>
+          <div><label>Languages</label><input id="bgLanguages"></div>
+        </div>
+      </div>
+      <div class="bg-backstory">
+        <label>Backstory</label>
+        <textarea id="bgBackstory" placeholder="Enter your backstory..." style="width:100%;height:150px;"></textarea>
+      </div>
+    </div>
   </div>
 
   <!-- Wallpaper section -->
@@ -235,11 +262,11 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// --- Helpers ---
-function saveField(id, value) { set(ref(db, 'fields/' + id), value); }
-async function loadField(id) { const snapshot = await get(child(ref(db), 'fields/' + id)); return snapshot.exists() ? snapshot.val() : ''; }
+// Helpers
+function saveField(id, value){ set(ref(db,'fields/'+id), value); }
+async function loadField(id){ const snap = await get(child(ref(db), 'fields/'+id)); return snap.exists() ? snap.val() : ''; }
 
-// --- Wallpaper ---
+// Wallpaper
 const wallpaperSelect=document.getElementById('wallpaperSelect');
 const wallpapers=Array.from(wallpaperSelect.options).map(o=>o.value);
 const prevButton=document.getElementById('prevWallpaper');
@@ -247,142 +274,117 @@ const nextButton=document.getElementById('nextWallpaper');
 let currentWallpaperIndex=0;
 
 window.addEventListener('load', async ()=>{
-  // load wallpaper
-  const saved = await loadField('wallpaper');
-  if(saved && wallpapers.includes(saved)){
-    document.body.style.backgroundImage=`url(${saved})`;
-    wallpaperSelect.value = saved;
-    currentWallpaperIndex = wallpapers.indexOf(saved);
+  // wallpaper
+  const savedWallpaper=await loadField('wallpaper');
+  if(savedWallpaper && wallpapers.includes(savedWallpaper)){
+    document.body.style.backgroundImage=`url(${savedWallpaper})`;
+    wallpaperSelect.value=savedWallpaper;
+    currentWallpaperIndex=wallpapers.indexOf(savedWallpaper);
   } else {
     document.body.style.backgroundImage=`url(${wallpapers[0]})`;
   }
-  // load stats
+  // stats
   document.querySelectorAll('.left-panel input').forEach(async input=>{
-    const val = await loadField(input.id); 
+    const val=await loadField(input.id);
     if(val) input.value=val;
     input.addEventListener('input',()=>saveField(input.id,input.value));
   });
-  // load tab data
-  loadTabData('actions');
-  loadTabData('spells');
-  loadTabData('inventory');
-  loadTabData('background');
+  // tabs
+  ['actions','spells','inventory','background'].forEach(loadTabData);
 });
 
 // wallpaper buttons
-wallpaperSelect.addEventListener('change',()=>{ updateWallpaper(wallpaperSelect.value); });
-prevButton.addEventListener('click',()=>{ nextWallpaper(-1); });
-nextButton.addEventListener('click',()=>{ nextWallpaper(1); });
+wallpaperSelect.addEventListener('change',()=>updateWallpaper(wallpaperSelect.value));
+prevButton.addEventListener('click',()=>nextWallpaper(-1));
+nextButton.addEventListener('click',()=>nextWallpaper(1));
+function updateWallpaper(value){ document.body.style.backgroundImage=`url(${value})`; saveField('wallpaper',value); currentWallpaperIndex=wallpapers.indexOf(value);}
+function nextWallpaper(delta){ currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length; updateWallpaper(wallpapers[currentWallpaperIndex]);}
 
-function updateWallpaper(value){
-  document.body.style.backgroundImage=`url(${value})`;
-  saveField('wallpaper',value);
-  currentWallpaperIndex=wallpapers.indexOf(value);
-}
-function nextWallpaper(delta){
-  currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length;
-  const newVal=wallpapers[currentWallpaperIndex];
-  wallpaperSelect.value=newVal;
-  updateWallpaper(newVal);
-}
+// Tabs
+document.querySelectorAll('.tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('#actionsContainer,#spellsContainer,#inventoryContainer,#backgroundContainer').forEach(d=>d.style.display='none');
+    document.getElementById(btn.dataset.tab+'Container').style.display='flex';
+    document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
 
-// --- Tabs ---
-const tabButtons=document.querySelectorAll('.tab-btn');
-tabButtons.forEach(btn=>btn.addEventListener('click',()=>{
-  document.querySelectorAll('#tabContent > div').forEach(d=>d.style.display='none');
-  document.getElementById(btn.dataset.tab + 'Container').style.display='flex';
-  tabButtons.forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}));
-
-// --- Actions/Spells/Inventory creation ---
+// Actions/Spells/Inventory
 function createActionElement(data, saveFunc){
   const div=document.createElement('div'); div.classList.add('action-section');
   ['name','range','hit','type','damage','notes'].forEach((f,i)=>{
     const input=document.createElement('input');
-    input.value=data[f]||'';
-    input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
+    input.value=data[f]||''; input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
     input.addEventListener('input',()=>saveFunc());
     div.appendChild(input);
   });
   const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
-  del.addEventListener('click',()=>{ div.remove(); saveFunc(); });
+  del.addEventListener('click',()=>{div.remove(); saveFunc();});
   div.appendChild(del);
   return div;
 }
-
 function createInventoryElement(item){
   const div=document.createElement('div'); div.classList.add('inventory-grid');
   ['quantity','name','description'].forEach(f=>{
     const input=document.createElement('input');
-    input.value=item[f]||'';
-    input.placeholder=f.charAt(0).toUpperCase()+f.slice(1);
+    input.value=item[f]||''; input.placeholder=f.charAt(0).toUpperCase()+f.slice(1);
     input.addEventListener('input',saveInventory);
     div.appendChild(input);
   });
   const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
-  del.addEventListener('click',()=>{ div.remove(); saveInventory(); });
+  del.addEventListener('click',()=>{div.remove(); saveInventory();});
   div.appendChild(del);
   return div;
 }
 
-// --- Load tab data ---
+// Load tab data
 async function loadTabData(tab){
   if(tab==='actions' || tab==='spells'){
-    const snapshot = await get(child(ref(db), tab));
+    const snap=await get(child(ref(db),tab));
     const container=document.getElementById(tab+'Container'); container.innerHTML='';
-    const data = snapshot.exists() ? snapshot.val() : [];
-    (data.length ? data : [{}]).forEach(d=>container.appendChild(createActionElement(d, ()=>saveTabData(tab))));
+    const data=snap.exists()?snap.val():[];
+    (data.length?data:[{}]).forEach(d=>container.appendChild(createActionElement(d,()=>saveTabData(tab))));
   }
   if(tab==='inventory'){
-    const snapshot = await get(child(ref(db), 'inventory'));
+    const snap=await get(child(ref(db),'inventory'));
     const container=document.getElementById('inventoryContainer'); container.innerHTML='';
-    const data = snapshot.exists() ? snapshot.val() : [];
-    (data.length ? data : [{}]).forEach(d=>container.appendChild(createInventoryElement(d)));
+    const data=snap.exists()?snap.val():[];
+    (data.length?data:[{}]).forEach(d=>container.appendChild(createInventoryElement(d)));
   }
   if(tab==='background'){
-    const fields = ['bgName','bgRace','bgClass','bgGender','bgSize','bgHeight','bgFaith','bgAge','bgWeight','bgLanguages','bgBackstory'];
-    fields.forEach(async id=>{
-      const val = await loadField(id);
-      const el=document.getElementById('backgroundContainer').querySelector('#'+id);
+    const fields=['bgName','bgRace','bgClass','bgGender','bgSize','bgHeight','bgFaith','bgAge','bgWeight','bgLanguages','bgBackstory'];
+    for(const id of fields){
+      const val=await loadField(id);
+      const el=document.getElementById(id);
       if(el) el.value=val;
       if(el) el.addEventListener('input',()=>saveField(id,el.value));
-    });
+    }
   }
 }
 
-// --- Save tab data ---
+// Save tab data
 function saveTabData(tab){
   const container=document.getElementById(tab+'Container');
-  const data = Array.from(container.querySelectorAll('.action-section')).map(div=>{
-    const inputs = div.querySelectorAll('input');
+  const data=Array.from(container.querySelectorAll('.action-section')).map(div=>{
+    const inputs=div.querySelectorAll('input');
     return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
   });
-  set(ref(db, tab), data);
+  set(ref(db,tab),data);
 }
-
 function saveInventory(){
   const container=document.getElementById('inventoryContainer');
-  const data = Array.from(container.querySelectorAll('.inventory-grid')).map(div=>{
+  const data=Array.from(container.querySelectorAll('.inventory-grid')).map(div=>{
     const inputs=div.querySelectorAll('input');
     return {quantity:inputs[0].value,name:inputs[1].value,description:inputs[2].value};
   });
   set(ref(db,'inventory'),data);
 }
 
-// --- Buttons ---
-document.getElementById('addActionBtn').addEventListener('click',()=>{
-  const container=document.getElementById('actionsContainer');
-  container.appendChild(createActionElement({},()=>saveTabData('actions')));
-});
-document.getElementById('addSpellBtn').addEventListener('click',()=>{
-  const container=document.getElementById('spellsContainer');
-  container.appendChild(createActionElement({},()=>saveTabData('spells')));
-});
-document.getElementById('addInventoryBtn').addEventListener('click',()=>{
-  const container=document.getElementById('inventoryContainer');
-  container.appendChild(createInventoryElement({}));
-});
+// Add buttons
+document.getElementById('addActionBtn').addEventListener('click',()=>{document.getElementById('actionsContainer').appendChild(createActionElement({},()=>saveTabData('actions')));});
+document.getElementById('addSpellBtn').addEventListener('click',()=>{document.getElementById('spellsContainer').appendChild(createActionElement({},()=>saveTabData('spells')));});
+document.getElementById('addInventoryBtn').addEventListener('click',()=>{document.getElementById('inventoryContainer').appendChild(createInventoryElement({}));});
 </script>
 </body>
 </html>
