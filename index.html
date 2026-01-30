@@ -100,7 +100,7 @@ textarea { resize: vertical; }
 .wallpaper-buttons button:hover { background: rgba(255,255,255,0.4); }
 .bg-fields { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
 .bg-backstory { flex: 1; margin-top: 10px; }
-#actionsContainer, #spellsContainer, #inventoryContainer { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+#actionsContainer, #spellsContainer, #inventoryContainer, #backgroundContainer { flex:1; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
 .action-section { display: flex; gap: 6px; align-items: center; transition: height 0.18s ease; }
 .action-section input { flex: 1; min-width: 0; cursor: pointer; }
 .delete-action-btn {
@@ -123,21 +123,19 @@ textarea { resize: vertical; }
   cursor: pointer;
 }
 #addActionBtn:hover, #addSpellBtn:hover, #addInventoryBtn:hover { background: rgba(255,255,255,0.4); }
-.action-headers { display: flex; gap: 10px; font-weight: bold; margin-bottom: 4px; }
-.action-headers div { flex: 1; padding-right: 6px; text-align:center; }
-.inventory-grid { display:flex; gap:6px; align-items:center; }
-.inventory-grid input { flex:1; min-width:0; }
+.action-headers { display: flex; gap: 100px; font-weight: bold; margin-bottom: 4px; }
+.action-headers div { padding-right: 6px; }
+.inventory-headers { display:flex; gap:10px; font-weight:bold; margin-bottom:4px; }
+.inventory-headers div { flex:1; }
 </style>
 </head>
 <body>
-
 <div class="left-panel">
   <h1>
     <img src="./Images/Character.png" class="profile-pic" alt="Profile Pic">
     D&D Character Sheet
   </h1>
 
-  <!-- Stats -->
   <div class="stats-row">
     <div><label>HP</label><input id="hp" type="number"></div>
     <div><label>AC</label><input id="ac" type="number"></div>
@@ -185,15 +183,40 @@ textarea { resize: vertical; }
     <button class="tab-btn" data-tab="background">Background</button>
   </div>
 
-  <!-- Tab containers -->
   <div class="tab-content" id="tabContent">
     <div id="actionsContainer"></div>
     <div id="spellsContainer" style="display:none;"></div>
     <div id="inventoryContainer" style="display:none;"></div>
-    <div id="backgroundContainer" style="display:none;"></div>
+    <div id="backgroundContainer" style="display:none;">
+      <div class="bg-fields">
+        <div class="stats-row">
+          <div><label>Name</label><input id="bgName"></div>
+          <div><label>Race</label><input id="bgRace"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Class</label><input id="bgClass"></div>
+          <div><label>Gender</label><input id="bgGender"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Size</label><input id="bgSize"></div>
+          <div><label>Height</label><input id="bgHeight"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Faith</label><input id="bgFaith"></div>
+          <div><label>Age</label><input id="bgAge"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Weight</label><input id="bgWeight"></div>
+          <div><label>Languages</label><input id="bgLanguages"></div>
+        </div>
+        <div class="bg-backstory">
+          <label>Backstory</label>
+          <textarea id="bgBackstory" placeholder="Enter your backstory..." style="flex:1;"></textarea>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <!-- Wallpaper section -->
   <div class="section">
     <label><b>Background Wallpaper</b></label>
     <select id="wallpaperSelect">
@@ -217,12 +240,11 @@ textarea { resize: vertical; }
   </div>
 </div>
 
-<!-- Firebase SDK -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
+// --- Firebase initialization ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-database.js";
 
-// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDMeSWp-UbFv_jYstUhbB1kkP-Ite-IHM8",
   authDomain: "dnd-caeldos.firebaseapp.com",
@@ -232,12 +254,9 @@ const firebaseConfig = {
   messagingSenderId: "940131839058",
   appId: "1:940131839058:web:2484beb5ffad8fcfd3438b"
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
-
-// --- Helpers ---
-function saveField(id, value) { set(ref(db, 'fields/' + id), value); }
-async function loadField(id) { const snapshot = await get(child(ref(db), 'fields/' + id)); return snapshot.exists() ? snapshot.val() : ''; }
 
 // --- Wallpaper ---
 const wallpaperSelect=document.getElementById('wallpaperSelect');
@@ -246,143 +265,143 @@ const prevButton=document.getElementById('prevWallpaper');
 const nextButton=document.getElementById('nextWallpaper');
 let currentWallpaperIndex=0;
 
-window.addEventListener('load', async ()=>{
-  // load wallpaper
-  const saved = await loadField('wallpaper');
-  if(saved && wallpapers.includes(saved)){
-    document.body.style.backgroundImage=`url(${saved})`;
-    wallpaperSelect.value = saved;
-    currentWallpaperIndex = wallpapers.indexOf(saved);
-  } else {
-    document.body.style.backgroundImage=`url(${wallpapers[0]})`;
-  }
-  // load stats
-  document.querySelectorAll('.left-panel input').forEach(async input=>{
-    const val = await loadField(input.id); 
-    if(val) input.value=val;
-    input.addEventListener('input',()=>saveField(input.id,input.value));
-  });
-  // load tab data
-  loadTabData('actions');
-  loadTabData('spells');
-  loadTabData('inventory');
-  loadTabData('background');
+// Load saved wallpaper
+window.addEventListener('load',()=>{
+  const savedWallpaper=localStorage.getItem('wallpaper');
+  if(savedWallpaper && wallpapers.includes(savedWallpaper)){
+    document.body.style.backgroundImage=`url(${savedWallpaper})`;
+    wallpaperSelect.value=savedWallpaper;
+    currentWallpaperIndex=wallpapers.indexOf(savedWallpaper);
+  } else document.body.style.backgroundImage=`url(${wallpapers[0]})`;
+  switchTab('actions');
 });
 
-// wallpaper buttons
-wallpaperSelect.addEventListener('change',()=>{ updateWallpaper(wallpaperSelect.value); });
-prevButton.addEventListener('click',()=>{ nextWallpaper(-1); });
-nextButton.addEventListener('click',()=>{ nextWallpaper(1); });
+// Wallpaper controls
+wallpaperSelect.addEventListener('change',()=>{updateWallpaper(0);});
+prevButton.addEventListener('click',()=>updateWallpaper(-1));
+nextButton.addEventListener('click',()=>updateWallpaper(1));
 
-function updateWallpaper(value){
-  document.body.style.backgroundImage=`url(${value})`;
-  saveField('wallpaper',value);
-  currentWallpaperIndex=wallpapers.indexOf(value);
-}
-function nextWallpaper(delta){
+function updateWallpaper(delta){
   currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length;
-  const newVal=wallpapers[currentWallpaperIndex];
-  wallpaperSelect.value=newVal;
-  updateWallpaper(newVal);
+  const newWallpaper=wallpapers[currentWallpaperIndex];
+  wallpaperSelect.value=newWallpaper;
+  document.body.style.backgroundImage=`url(${newWallpaper})`;
+  localStorage.setItem('wallpaper',newWallpaper);
 }
 
 // --- Tabs ---
 const tabButtons=document.querySelectorAll('.tab-btn');
-tabButtons.forEach(btn=>btn.addEventListener('click',()=>{
-  document.querySelectorAll('#tabContent > div').forEach(d=>d.style.display='none');
-  document.getElementById(btn.dataset.tab + 'Container').style.display='flex';
-  tabButtons.forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-}));
+const tabContent=document.getElementById('tabContent');
 
-// --- Actions/Spells/Inventory creation ---
-function createActionElement(data, saveFunc){
+function switchTab(tab){
+  document.querySelectorAll('#actionsContainer, #spellsContainer, #inventoryContainer, #backgroundContainer').forEach(d=>d.style.display='none');
+  document.getElementById(tab+'Container').style.display='flex';
+  tabButtons.forEach(btn => btn.classList.remove('active'));
+  document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
+}
+tabButtons.forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
+
+// --- Create Actions/Spells/Inventory sections ---
+function createActionSection(action={name:'',range:'',hit:'',type:'',damage:'',notes:''}){
   const div=document.createElement('div'); div.classList.add('action-section');
-  ['name','range','hit','type','damage','notes'].forEach((f,i)=>{
-    const input=document.createElement('input');
-    input.value=data[f]||'';
+  ['name','range','hit','type','damage','notes'].forEach((field,i)=>{
+    const input=document.createElement('input'); input.value=action[field]||'';
     input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
-    input.addEventListener('input',()=>saveFunc());
+    input.addEventListener('input',saveAll);
     div.appendChild(input);
   });
-  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
-  del.addEventListener('click',()=>{ div.remove(); saveFunc(); });
-  div.appendChild(del);
+  const delBtn=document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
+  delBtn.addEventListener('click',()=>{div.remove(); saveAll();});
+  div.appendChild(delBtn);
   return div;
 }
 
-function createInventoryElement(item){
-  const div=document.createElement('div'); div.classList.add('inventory-grid');
-  ['quantity','name','description'].forEach(f=>{
+function createInventorySection(item={quantity:'',name:'',description:''}){
+  const div = document.createElement('div'); div.classList.add('action-section');
+  ['quantity','name','description'].forEach((field, i)=>{
     const input=document.createElement('input');
-    input.value=item[f]||'';
-    input.placeholder=f.charAt(0).toUpperCase()+f.slice(1);
-    input.addEventListener('input',saveInventory);
+    input.placeholder=field.charAt(0).toUpperCase()+field.slice(1);
+    input.value=item[field]||'';
+    input.addEventListener('input',saveAll);
     div.appendChild(input);
   });
-  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
-  del.addEventListener('click',()=>{ div.remove(); saveInventory(); });
-  div.appendChild(del);
+  const delBtn=document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
+  delBtn.addEventListener('click',()=>{div.remove(); saveAll();});
+  div.appendChild(delBtn);
   return div;
 }
 
-// --- Load tab data ---
-async function loadTabData(tab){
-  if(tab==='actions' || tab==='spells'){
-    const snapshot = await get(child(ref(db), tab));
-    const container=document.getElementById(tab+'Container'); container.innerHTML='';
-    const data = snapshot.exists() ? snapshot.val() : [];
-    (data.length ? data : [{}]).forEach(d=>container.appendChild(createActionElement(d, ()=>saveTabData(tab))));
-  }
-  if(tab==='inventory'){
-    const snapshot = await get(child(ref(db), 'inventory'));
-    const container=document.getElementById('inventoryContainer'); container.innerHTML='';
-    const data = snapshot.exists() ? snapshot.val() : [];
-    (data.length ? data : [{}]).forEach(d=>container.appendChild(createInventoryElement(d)));
-  }
-  if(tab==='background'){
-    const fields = ['bgName','bgRace','bgClass','bgGender','bgSize','bgHeight','bgFaith','bgAge','bgWeight','bgLanguages','bgBackstory'];
-    fields.forEach(async id=>{
-      const val = await loadField(id);
-      const el=document.getElementById('backgroundContainer').querySelector('#'+id);
-      if(el) el.value=val;
-      if(el) el.addEventListener('input',()=>saveField(id,el.value));
-    });
-  }
-}
-
-// --- Save tab data ---
-function saveTabData(tab){
-  const container=document.getElementById(tab+'Container');
-  const data = Array.from(container.querySelectorAll('.action-section')).map(div=>{
-    const inputs = div.querySelectorAll('input');
-    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
-  });
-  set(ref(db, tab), data);
-}
-
-function saveInventory(){
-  const container=document.getElementById('inventoryContainer');
-  const data = Array.from(container.querySelectorAll('.inventory-grid')).map(div=>{
+// --- Save & Load ---
+function saveAll(){
+  // Actions
+  const actions=Array.from(document.getElementById('actionsContainer').querySelectorAll('.action-section')).map(div=>{
     const inputs=div.querySelectorAll('input');
-    return {quantity:inputs[0].value,name:inputs[1].value,description:inputs[2].value};
+    return {name:inputs[0].value, range:inputs[1].value, hit:inputs[2].value, type:inputs[3].value, damage:inputs[4].value, notes:inputs[5].value};
   });
-  set(ref(db,'inventory'),data);
+  set(ref(db,'actions'), actions);
+
+  // Inventory
+  const inv=Array.from(document.getElementById('inventoryContainer').querySelectorAll('.action-section')).map(div=>{
+    const inputs=div.querySelectorAll('input');
+    return {quantity:inputs[0].value, name:inputs[1].value, description:inputs[2].value};
+  });
+  set(ref(db,'inventory'), inv);
+
+  // Spells
+  const spells=Array.from(document.getElementById('spellsContainer').querySelectorAll('.action-section')).map(div=>{
+    const inputs=div.querySelectorAll('input');
+    return {name:inputs[0].value, range:inputs[1].value, hit:inputs[2].value, type:inputs[3].value, damage:inputs[4].value, notes:inputs[5].value};
+  });
+  set(ref(db,'spells'), spells);
+
+  // Stats & background
+  document.querySelectorAll('input,textarea').forEach(el=>{
+    if(el.id) set(ref(db,`fields/${el.id}`), el.value);
+  });
 }
 
-// --- Buttons ---
-document.getElementById('addActionBtn').addEventListener('click',()=>{
-  const container=document.getElementById('actionsContainer');
-  container.appendChild(createActionElement({},()=>saveTabData('actions')));
+// Load data on start
+window.addEventListener('load',()=>{
+  const dbRef = ref(db);
+  onValue(dbRef, (snapshot)=>{
+    const data = snapshot.val();
+    if(!data) return;
+
+    // Stats & background
+    if(data.fields){
+      Object.entries(data.fields).forEach(([id,val])=>{
+        const el=document.getElementById(id);
+        if(el) el.value=val;
+      });
+    }
+
+    // Actions
+    if(data.actions){
+      const acC=document.getElementById('actionsContainer'); acC.innerHTML='';
+      data.actions.forEach(a=>acC.appendChild(createActionSection(a)));
+    }
+
+    // Spells
+    if(data.spells){
+      const spC=document.getElementById('spellsContainer'); spC.innerHTML='';
+      data.spells.forEach(s=>spC.appendChild(createActionSection(s)));
+    }
+
+    // Inventory
+    if(data.inventory){
+      const invC=document.getElementById('inventoryContainer'); invC.innerHTML='';
+      data.inventory.forEach(i=>invC.appendChild(createInventorySection(i)));
+    }
+  });
 });
-document.getElementById('addSpellBtn').addEventListener('click',()=>{
-  const container=document.getElementById('spellsContainer');
-  container.appendChild(createActionElement({},()=>saveTabData('spells')));
-});
-document.getElementById('addInventoryBtn').addEventListener('click',()=>{
-  const container=document.getElementById('inventoryContainer');
-  container.appendChild(createInventoryElement({}));
-});
+
+// Add Buttons
+document.getElementById('addActionBtn').addEventListener('click',()=>{document.getElementById('actionsContainer').appendChild(createActionSection()); saveAll();});
+document.getElementById('addSpellBtn').addEventListener('click',()=>{document.getElementById('spellsContainer').appendChild(createActionSection()); saveAll();});
+document.getElementById('addInventoryBtn').addEventListener('click',()=>{document.getElementById('inventoryContainer').appendChild(createInventorySection()); saveAll();});
+
+// Autosave
+setInterval(saveAll,1000);
 </script>
 </body>
 </html>
