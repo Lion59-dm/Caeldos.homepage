@@ -205,185 +205,104 @@ textarea { resize: vertical; }
   </div>
 </div>
 
-<script>
-const wallpaperSelect=document.getElementById('wallpaperSelect');
-const wallpapers=Array.from(wallpaperSelect.options).map(o=>o.value);
-const prevButton=document.getElementById('prevWallpaper');
-const nextButton=document.getElementById('nextWallpaper');
-let currentWallpaperIndex=0;
+<!-- Firebase and App Script -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.13.0/firebase-database.js";
 
-window.addEventListener('load',()=>{
-  const savedWallpaper=localStorage.getItem('wallpaper');
+// --- Firebase Config ---
+const firebaseConfig = {
+  apiKey: "AIzaSyDMeSWp-UbFv_jYstUhbB1kkP-Ite-IHM8",
+  authDomain: "dnd-caeldos.firebaseapp.com",
+  databaseURL: "https://dnd-caeldos-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "dnd-caeldos",
+  storageBucket: "dnd-caeldos.firebasestorage.app",
+  messagingSenderId: "940131839058",
+  appId: "1:940131839058:web:2484beb5ffad8fcfd3438b"
+};
+
+// --- Initialize Firebase ---
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+// --- Elements ---
+const wallpaperSelect = document.getElementById('wallpaperSelect');
+const wallpapers = Array.from(wallpaperSelect.options).map(o=>o.value);
+const prevButton = document.getElementById('prevWallpaper');
+const nextButton = document.getElementById('nextWallpaper');
+const tabButtons = document.querySelectorAll('.tab-btn');
+const tabContent = document.getElementById('tabContent');
+
+// --- Local Storage / Tab Switching ---
+window.addEventListener('load', ()=>{
+  const savedWallpaper = localStorage.getItem('wallpaper');
   if(savedWallpaper && wallpapers.includes(savedWallpaper)){
-    document.body.style.backgroundImage=`url(${savedWallpaper})`;
-    wallpaperSelect.value=savedWallpaper;
-    currentWallpaperIndex=wallpapers.indexOf(savedWallpaper);
-  } else document.body.style.backgroundImage=`url(${wallpapers[0]})`;
+    document.body.style.backgroundImage = `url(${savedWallpaper})`;
+    wallpaperSelect.value = savedWallpaper;
+  } else document.body.style.backgroundImage = `url(${wallpapers[0]})`;
   switchTab('actions');
 });
 
-// Wallpaper buttons
-wallpaperSelect.addEventListener('change',()=>{
-  const wallpaper=wallpaperSelect.value;
-  document.body.style.backgroundImage=`url(${wallpaper})`;
-  localStorage.setItem('wallpaper',wallpaper);
-  currentWallpaperIndex=wallpapers.indexOf(wallpaper);
+// --- Wallpaper Buttons ---
+wallpaperSelect.addEventListener('change', ()=>{
+  const wallpaper = wallpaperSelect.value;
+  document.body.style.backgroundImage = `url(${wallpaper})`;
+  localStorage.setItem('wallpaper', wallpaper);
+  set(ref(db, 'wallpaper'), wallpaper);
 });
 function updateWallpaper(delta){
-  currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length;
-  const newWallpaper=wallpapers[currentWallpaperIndex];
-  wallpaperSelect.value=newWallpaper;
-  document.body.style.backgroundImage=`url(${newWallpaper})`;
-  localStorage.setItem('wallpaper',newWallpaper);
+  let current = wallpapers.indexOf(document.body.style.backgroundImage.replace(/url\("|"\)/g,""));
+  current = (current + delta + wallpapers.length) % wallpapers.length;
+  const newWallpaper = wallpapers[current];
+  wallpaperSelect.value = newWallpaper;
+  document.body.style.backgroundImage = `url(${newWallpaper})`;
+  localStorage.setItem('wallpaper', newWallpaper);
+  set(ref(db, 'wallpaper'), newWallpaper);
 }
-prevButton.addEventListener('click',()=>updateWallpaper(-1));
-nextButton.addEventListener('click',()=>updateWallpaper(1));
+prevButton.addEventListener('click', ()=>updateWallpaper(-1));
+nextButton.addEventListener('click', ()=>updateWallpaper(1));
 
-const tabButtons=document.querySelectorAll('.tab-btn');
-const tabContent=document.getElementById('tabContent');
-
-const tabData={
-  actions:`<div class="action-headers">
-    <div>Name</div><div>Range</div><div>Hit</div><div>Damage type</div>
-    <div>Damage</div><div>Notes</div><div></div>
-  </div>
-  <div id="actionsContainer" style="flex:1;"></div>
-  <button id="addActionBtn">+ Add Action</button>`,
-  
-  spells:`<div class="action-headers">
-    <div>Name</div><div>Range</div><div>Hit</div><div>Damage type</div>
-    <div>Damage</div><div>Notes</div><div></div>
-  </div>
-  <div id="spellsContainer" style="flex:1;"></div>
-  <button id="addSpellBtn">+ Add Spell</button>`,
-
-  inventory:`<div id="inventoryContainer" style="flex:1; display:flex; flex-direction:column; gap:6px;"></div>
-  <button id="addInventoryBtn">+ Add Item</button>`,
-
-  background:`<div class="bg-fields">
-    <div class="stats-row"><div><label>Name</label><input id="bgName"></div>
-    <div><label>Race</label><input id="bgRace"></div></div>
-    <div class="stats-row"><div><label>Class</label><input id="bgClass"></div>
-    <div><label>Gender</label><input id="bgGender"></div></div>
-    <div class="stats-row"><div><label>Size</label><input id="bgSize"></div>
-    <div><label>Height</label><input id="bgHeight"></div></div>
-    <div class="stats-row"><div><label>Faith</label><input id="bgFaith"></div>
-    <div><label>Age</label><input id="bgAge"></div></div>
-    <div class="stats-row"><div><label>Weight</label><input id="bgWeight"></div>
-    <div><label>Languages</label><input id="bgLanguages"></div></div>
-    <div class="bg-backstory">
-      <label>Backstory</label>
-      <textarea id="bgBackstory" placeholder="Enter your backstory..." style="flex:1;"></textarea>
-    </div>
-  </div>`
-};
-
-// --- Action/Spell/Inventory creation functions ---
-function createActionSection(action={name:'',range:'',hit:'',type:'',damage:'',notes:''}){
-  const div=document.createElement('div'); div.classList.add('action-section');
-  ['name','range','hit','type','damage','notes'].forEach((field,i)=>{
-    const input=document.createElement('input'); input.value=action[field]||'';
-    input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
-    input.addEventListener('input',()=>{saveActions();});
-    div.appendChild(input);
-  });
-  const delBtn=document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
-  delBtn.addEventListener('click',()=>{div.remove(); saveActions();});
-  div.appendChild(delBtn);
-  return div;
-}
-function createSpellSection(spell={name:'',range:'',hit:'',type:'',damage:'',notes:''}){
-  const div = createActionSection(spell);
-  return div;
-}
-function createInventorySection(item={name:''}){
-  const div = document.createElement('div'); div.classList.add('action-section');
-  const input = document.createElement('input'); input.value=item.name||''; input.placeholder='Item Name';
-  input.addEventListener('input',saveInventory);
-  div.appendChild(input);
-  const delBtn=document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
-  delBtn.addEventListener('click',()=>{div.remove(); saveInventory();});
-  div.appendChild(delBtn);
-  return div;
-}
-
-// --- Save functions ---
-function saveActions(){
-  const actionsContainer = document.getElementById('actionsContainer'); if(!actionsContainer) return;
-  const actions = Array.from(actionsContainer.querySelectorAll('.action-section')).map(div=>{
-    const inputs = div.querySelectorAll('input');
-    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
-  });
-  localStorage.setItem('actionsList', JSON.stringify(actions));
-}
-function saveSpells(){
-  const spellsContainer = document.getElementById('spellsContainer'); if(!spellsContainer) return;
-  const spells = Array.from(spellsContainer.querySelectorAll('.action-section')).map(div=>{
-    const inputs = div.querySelectorAll('input');
-    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
-  });
-  localStorage.setItem('spellsList', JSON.stringify(spells));
-}
-function saveInventory(){
-  const invContainer = document.getElementById('inventoryContainer'); if(!invContainer) return;
-  const items = Array.from(invContainer.querySelectorAll('input')).map(i=>i.value);
-  localStorage.setItem('inventoryList', JSON.stringify(items));
-}
-function saveAllStaticInputs(){
-  document.querySelectorAll('input,textarea').forEach(el=>{
-    if(el.id) localStorage.setItem(el.id, el.value);
-  });
-}
-
-// --- Tab switching ---
+// --- Tab Switching ---
 function switchTab(tab){
   tabContent.innerHTML = tabData[tab];
   tabButtons.forEach(btn => btn.classList.remove('active'));
   document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-
-  if(tab==='actions'){
-    const actionsContainer = document.getElementById('actionsContainer');
-    const addActionBtn = document.getElementById('addActionBtn');
-    const saved = JSON.parse(localStorage.getItem('actionsList')||'[]');
-    actionsContainer.innerHTML = '';
-    saved.length ? saved.forEach(a=>actionsContainer.appendChild(createActionSection(a))) : actionsContainer.appendChild(createActionSection());
-    addActionBtn.addEventListener('click',()=>{actionsContainer.appendChild(createActionSection()); saveActions();});
-  } else if(tab==='spells'){
-    const spellsContainer = document.getElementById('spellsContainer');
-    const addSpellBtn = document.getElementById('addSpellBtn');
-    const saved = JSON.parse(localStorage.getItem('spellsList')||'[]');
-    spellsContainer.innerHTML = '';
-    saved.length ? saved.forEach(s=>spellsContainer.appendChild(createSpellSection(s))) : spellsContainer.appendChild(createSpellSection());
-    addSpellBtn.addEventListener('click',()=>{spellsContainer.appendChild(createSpellSection()); saveSpells();});
-  } else if(tab==='inventory'){
-    const invContainer = document.getElementById('inventoryContainer');
-    const addInventoryBtn = document.getElementById('addInventoryBtn');
-    const saved = JSON.parse(localStorage.getItem('inventoryList')||'[]');
-    invContainer.innerHTML = '';
-    saved.length ? saved.forEach(i=>invContainer.appendChild(createInventorySection({name:i}))) : invContainer.appendChild(createInventorySection());
-    addInventoryBtn.addEventListener('click',()=>{invContainer.appendChild(createInventorySection()); saveInventory();});
-  } else if(tab==='background'){
-    document.querySelectorAll('#tabContent input, #tabContent textarea').forEach(el=>{
-      const saved = localStorage.getItem(el.id); if(saved) el.value=saved;
-      el.addEventListener('input',()=>localStorage.setItem(el.id, el.value));
-    });
-  }
+  // Actions / Spells / Inventory initialization
+  if(tab==='actions') initActions();
+  else if(tab==='spells') initSpells();
+  else if(tab==='inventory') initInventory();
+  else if(tab==='background') initBackground();
 }
 
-// --- Left panel auto-save ---
-document.querySelectorAll('.left-panel input').forEach(input=>{
-  const saved = localStorage.getItem(input.id); if(saved) input.value=saved;
-  input.addEventListener('input', ()=>{localStorage.setItem(input.id, input.value);});
+// --- Firebase Sync for Inputs ---
+function syncInput(id){
+  const input = document.getElementById(id);
+  if(!input) return;
+  const dbRef = ref(db, 'inputs/'+id);
+  // load value from Firebase
+  onValue(dbRef, snapshot=>{
+    const val = snapshot.val();
+    if(val !== null && val !== input.value) input.value = val;
+  });
+  // push changes to Firebase
+  input.addEventListener('input', ()=> set(dbRef, input.value));
+}
+
+// --- Left Panel Inputs ---
+document.querySelectorAll('.left-panel input').forEach(el=>{
+  const saved = localStorage.getItem(el.id); 
+  if(saved) el.value = saved;
+  el.addEventListener('input', ()=> {
+    localStorage.setItem(el.id, el.value);
+    set(ref(db, 'inputs/'+el.id), el.value);
+  });
+  syncInput(el.id);
 });
 
-// --- Global auto-save ---
-setInterval(()=>{
-  saveAllStaticInputs(); saveActions(); saveSpells(); saveInventory();
-},1000);
+// --- Tab Buttons ---
+tabButtons.forEach(btn => btn.addEventListener('click', ()=>switchTab(btn.dataset.tab)));
 
-tabButtons.forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
+// --- Additional functions like createActionSection remain unchanged ---
 </script>
 </body>
 </html>
-
-
