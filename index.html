@@ -101,8 +101,8 @@ textarea { resize: vertical; }
 .bg-fields { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
 .bg-backstory { flex: 1; margin-top: 10px; }
 #actionsContainer, #spellsContainer, #inventoryContainer { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
-.action-section, .inventory-section { display: flex; gap: 6px; align-items: center; transition: height 0.18s ease; }
-.action-section input, .inventory-section input { flex: 1; min-width: 0; cursor: pointer; }
+.action-section { display: flex; gap: 6px; align-items: center; transition: height 0.18s ease; }
+.action-section input { flex: 1; min-width: 0; cursor: pointer; }
 .delete-action-btn {
   flex: 0 0 60px;
   background: rgba(255,0,0,0.5);
@@ -123,17 +123,21 @@ textarea { resize: vertical; }
   cursor: pointer;
 }
 #addActionBtn:hover, #addSpellBtn:hover, #addInventoryBtn:hover { background: rgba(255,255,255,0.4); }
-.action-headers, .inventory-headers { display: flex; gap: 10px; font-weight: bold; margin-bottom: 4px; }
-.inventory-headers div { flex: 1; padding-right: 6px; }
+.action-headers { display: flex; gap: 10px; font-weight: bold; margin-bottom: 4px; }
+.action-headers div { flex: 1; padding-right: 6px; text-align:center; }
+.inventory-grid { display:flex; gap:6px; align-items:center; }
+.inventory-grid input { flex:1; min-width:0; }
 </style>
 </head>
 <body>
+
 <div class="left-panel">
   <h1>
     <img src="./Images/Character.png" class="profile-pic" alt="Profile Pic">
     D&D Character Sheet
   </h1>
 
+  <!-- Stats -->
   <div class="stats-row">
     <div><label>HP</label><input id="hp" type="number"></div>
     <div><label>AC</label><input id="ac" type="number"></div>
@@ -180,8 +184,16 @@ textarea { resize: vertical; }
     <button class="tab-btn" data-tab="inventory">Inventory</button>
     <button class="tab-btn" data-tab="background">Background</button>
   </div>
-  <div class="tab-content" id="tabContent"></div>
 
+  <!-- Tab containers -->
+  <div class="tab-content" id="tabContent">
+    <div id="actionsContainer"></div>
+    <div id="spellsContainer" style="display:none;"></div>
+    <div id="inventoryContainer" style="display:none;"></div>
+    <div id="backgroundContainer" style="display:none;"></div>
+  </div>
+
+  <!-- Wallpaper section -->
   <div class="section">
     <label><b>Background Wallpaper</b></label>
     <select id="wallpaperSelect">
@@ -205,10 +217,10 @@ textarea { resize: vertical; }
   </div>
 </div>
 
+<!-- Firebase SDK -->
 <script type="module">
-// Firebase import
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.2/firebase-app.js";
-import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.6.2/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
 // Firebase config
 const firebaseConfig = {
@@ -216,168 +228,161 @@ const firebaseConfig = {
   authDomain: "dnd-caeldos.firebaseapp.com",
   databaseURL: "https://dnd-caeldos-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "dnd-caeldos",
-  storageBucket: "dnd-caeldos.firebasestorage.app",
+  storageBucket: "dnd-caeldos.appspot.com",
   messagingSenderId: "940131839058",
   appId: "1:940131839058:web:2484beb5ffad8fcfd3438b"
 };
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// --- Wallpaper ---
-const wallpaperSelect = document.getElementById('wallpaperSelect');
-const wallpapers = Array.from(wallpaperSelect.options).map(o=>o.value);
-const prevButton = document.getElementById('prevWallpaper');
-const nextButton = document.getElementById('nextWallpaper');
-let currentWallpaperIndex = 0;
+// --- Helpers ---
+function saveField(id, value) { set(ref(db, 'fields/' + id), value); }
+async function loadField(id) { const snapshot = await get(child(ref(db), 'fields/' + id)); return snapshot.exists() ? snapshot.val() : ''; }
 
-window.addEventListener('load', () => {
-  onValue(ref(db, 'wallpaper'), (snapshot) => {
-    const val = snapshot.val();
-    if (val && wallpapers.includes(val)) {
-      document.body.style.backgroundImage = `url(${val})`;
-      wallpaperSelect.value = val;
-      currentWallpaperIndex = wallpapers.indexOf(val);
-    } else {
-      document.body.style.backgroundImage = `url(${wallpapers[0]})`;
-    }
+// --- Wallpaper ---
+const wallpaperSelect=document.getElementById('wallpaperSelect');
+const wallpapers=Array.from(wallpaperSelect.options).map(o=>o.value);
+const prevButton=document.getElementById('prevWallpaper');
+const nextButton=document.getElementById('nextWallpaper');
+let currentWallpaperIndex=0;
+
+window.addEventListener('load', async ()=>{
+  // load wallpaper
+  const saved = await loadField('wallpaper');
+  if(saved && wallpapers.includes(saved)){
+    document.body.style.backgroundImage=`url(${saved})`;
+    wallpaperSelect.value = saved;
+    currentWallpaperIndex = wallpapers.indexOf(saved);
+  } else {
+    document.body.style.backgroundImage=`url(${wallpapers[0]})`;
+  }
+  // load stats
+  document.querySelectorAll('.left-panel input').forEach(async input=>{
+    const val = await loadField(input.id); 
+    if(val) input.value=val;
+    input.addEventListener('input',()=>saveField(input.id,input.value));
   });
-  switchTab('actions');
+  // load tab data
+  loadTabData('actions');
+  loadTabData('spells');
+  loadTabData('inventory');
+  loadTabData('background');
 });
 
-wallpaperSelect.addEventListener('change', () => updateWallpaper(0));
-prevButton.addEventListener('click', () => updateWallpaper(-1));
-nextButton.addEventListener('click', () => updateWallpaper(1));
+// wallpaper buttons
+wallpaperSelect.addEventListener('change',()=>{ updateWallpaper(wallpaperSelect.value); });
+prevButton.addEventListener('click',()=>{ nextWallpaper(-1); });
+nextButton.addEventListener('click',()=>{ nextWallpaper(1); });
 
-function updateWallpaper(delta) {
-  currentWallpaperIndex = (currentWallpaperIndex + delta + wallpapers.length) % wallpapers.length;
-  const newWallpaper = wallpapers[currentWallpaperIndex];
-  wallpaperSelect.value = newWallpaper;
-  document.body.style.backgroundImage = `url(${newWallpaper})`;
-  set(ref(db, 'wallpaper'), newWallpaper);
+function updateWallpaper(value){
+  document.body.style.backgroundImage=`url(${value})`;
+  saveField('wallpaper',value);
+  currentWallpaperIndex=wallpapers.indexOf(value);
+}
+function nextWallpaper(delta){
+  currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length;
+  const newVal=wallpapers[currentWallpaperIndex];
+  wallpaperSelect.value=newVal;
+  updateWallpaper(newVal);
 }
 
 // --- Tabs ---
-const tabButtons = document.querySelectorAll('.tab-btn');
-const tabContent = document.getElementById('tabContent');
+const tabButtons=document.querySelectorAll('.tab-btn');
+tabButtons.forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('#tabContent > div').forEach(d=>d.style.display='none');
+  document.getElementById(btn.dataset.tab + 'Container').style.display='flex';
+  tabButtons.forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}));
 
-const tabData = {
-  actions: `<div class="action-headers">
-    <div>Name</div><div>Range</div><div>Hit</div><div>Damage type</div>
-    <div>Damage</div><div>Notes</div><div></div>
-  </div><div id="actionsContainer" style="flex:1;"></div>
-  <button id="addActionBtn">+ Add Action</button>`,
-
-  spells: `<div class="action-headers">
-    <div>Name</div><div>Range</div><div>Hit</div><div>Damage type</div>
-    <div>Damage</div><div>Notes</div><div></div>
-  </div><div id="spellsContainer" style="flex:1;"></div>
-  <button id="addSpellBtn">+ Add Spell</button>`,
-
-  inventory: `<div class="inventory-headers"><div>Quantity</div><div>Name</div><div>Description</div></div>
-  <div id="inventoryContainer" style="flex:1;"></div>
-  <button id="addInventoryBtn">+ Add Item</button>`,
-
-  background: `<div class="bg-fields">
-    <div class="stats-row"><div><label>Name</label><input id="bgName"></div>
-    <div><label>Race</label><input id="bgRace"></div></div>
-    <div class="stats-row"><div><label>Class</label><input id="bgClass"></div>
-    <div><label>Gender</label><input id="bgGender"></div></div>
-    <div class="stats-row"><div><label>Size</label><input id="bgSize"></div>
-    <div><label>Height</label><input id="bgHeight"></div></div>
-    <div class="stats-row"><div><label>Faith</label><input id="bgFaith"></div>
-    <div><label>Age</label><input id="bgAge"></div></div>
-    <div class="stats-row"><div><label>Weight</label><input id="bgWeight"></div>
-    <div><label>Languages</label><input id="bgLanguages"></div></div>
-    <div class="bg-backstory">
-      <label>Backstory</label>
-      <textarea id="bgBackstory" placeholder="Enter your backstory..." style="flex:1;"></textarea>
-    </div>
-  </div>`
-};
-
-// --- Action/Spell Sections ---
-function createActionSection(action={name:'',range:'',hit:'',type:'',damage:'',notes:''}) {
-  const div = document.createElement('div'); div.classList.add('action-section');
-  ['name','range','hit','type','damage','notes'].forEach((field,i)=>{
-    const input = document.createElement('input'); input.value = action[field] || '';
-    input.placeholder = ['Name','Range','Hit','Damage type','Damage','Notes'][i];
-    input.addEventListener('input', saveActions);
+// --- Actions/Spells/Inventory creation ---
+function createActionElement(data, saveFunc){
+  const div=document.createElement('div'); div.classList.add('action-section');
+  ['name','range','hit','type','damage','notes'].forEach((f,i)=>{
+    const input=document.createElement('input');
+    input.value=data[f]||'';
+    input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
+    input.addEventListener('input',()=>saveFunc());
     div.appendChild(input);
   });
-  const delBtn = document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
-  delBtn.addEventListener('click',()=>{div.remove(); saveActions();});
-  div.appendChild(delBtn);
-  return div;
-}
-function createSpellSection(spell){ return createActionSection(spell); }
-
-// --- Inventory Section ---
-function createInventorySection(item={quantity:'',name:'',description:''}) {
-  const div = document.createElement('div'); div.classList.add('inventory-section');
-  ['quantity','name','description'].forEach((field, i) => {
-    const input = document.createElement('input'); input.value=item[field]||''; input.placeholder=['Quantity','Name','Description'][i];
-    input.addEventListener('input', saveInventory);
-    div.appendChild(input);
-  });
-  const delBtn = document.createElement('button'); delBtn.textContent='Delete'; delBtn.className='delete-action-btn';
-  delBtn.addEventListener('click',()=>{div.remove(); saveInventory();});
-  div.appendChild(delBtn);
+  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
+  del.addEventListener('click',()=>{ div.remove(); saveFunc(); });
+  div.appendChild(del);
   return div;
 }
 
-// --- Firebase Save Functions ---
-function saveActions(){ const data = Array.from(document.querySelectorAll('.action-section')).map(d=>{
-  const inputs = d.querySelectorAll('input'); return {name:inputs[0].value, range:inputs[1].value, hit:inputs[2].value, type:inputs[3].value, damage:inputs[4].value, notes:inputs[5].value};
-}); set(ref(db,'actions'),data);}
-function saveSpells(){ const data = Array.from(document.querySelectorAll('.action-section')).map(d=>{
-  const inputs = d.querySelectorAll('input'); return {name:inputs[0].value, range:inputs[1].value, hit:inputs[2].value, type:inputs[3].value, damage:inputs[4].value, notes:inputs[5].value};
-}); set(ref(db,'spells'),data);}
-function saveInventory(){ const data = Array.from(document.querySelectorAll('.inventory-section')).map(d=>{
-  const inputs=d.querySelectorAll('input'); return {quantity:inputs[0].value,name:inputs[1].value,description:inputs[2].value};
-}); set(ref(db,'inventory'),data);}
-function saveBackground(){ document.querySelectorAll('#tabContent input,#tabContent textarea').forEach(el=>{
-  set(ref(db,'background/'+el.id), el.value);
-});}
+function createInventoryElement(item){
+  const div=document.createElement('div'); div.classList.add('inventory-grid');
+  ['quantity','name','description'].forEach(f=>{
+    const input=document.createElement('input');
+    input.value=item[f]||'';
+    input.placeholder=f.charAt(0).toUpperCase()+f.slice(1);
+    input.addEventListener('input',saveInventory);
+    div.appendChild(input);
+  });
+  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
+  del.addEventListener('click',()=>{ div.remove(); saveInventory(); });
+  div.appendChild(del);
+  return div;
+}
 
-// --- Tab Switching ---
-function switchTab(tab){
-  tabContent.innerHTML = tabData[tab];
-  tabButtons.forEach(btn=>btn.classList.remove('active'));
-  document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
-
-  if(tab==='actions'){
-    const container = document.getElementById('actionsContainer'); const btn = document.getElementById('addActionBtn');
-    onValue(ref(db,'actions'), snapshot => {
-      container.innerHTML='';
-      const saved = snapshot.val()||[]; saved.length ? saved.forEach(a=>container.appendChild(createActionSection(a))) : container.appendChild(createActionSection());
-    });
-    btn.addEventListener('click',()=>{ container.appendChild(createActionSection()); saveActions(); });
+// --- Load tab data ---
+async function loadTabData(tab){
+  if(tab==='actions' || tab==='spells'){
+    const snapshot = await get(child(ref(db), tab));
+    const container=document.getElementById(tab+'Container'); container.innerHTML='';
+    const data = snapshot.exists() ? snapshot.val() : [];
+    (data.length ? data : [{}]).forEach(d=>container.appendChild(createActionElement(d, ()=>saveTabData(tab))));
   }
-  else if(tab==='spells'){
-    const container = document.getElementById('spellsContainer'); const btn = document.getElementById('addSpellBtn');
-    onValue(ref(db,'spells'), snapshot => {
-      container.innerHTML='';
-      const saved = snapshot.val()||[]; saved.length ? saved.forEach(s=>container.appendChild(createSpellSection(s))) : container.appendChild(createSpellSection());
-    });
-    btn.addEventListener('click',()=>{ container.appendChild(createSpellSection()); saveSpells(); });
+  if(tab==='inventory'){
+    const snapshot = await get(child(ref(db), 'inventory'));
+    const container=document.getElementById('inventoryContainer'); container.innerHTML='';
+    const data = snapshot.exists() ? snapshot.val() : [];
+    (data.length ? data : [{}]).forEach(d=>container.appendChild(createInventoryElement(d)));
   }
-  else if(tab==='inventory'){
-    const container = document.getElementById('inventoryContainer'); const btn = document.getElementById('addInventoryBtn');
-    onValue(ref(db,'inventory'), snapshot => {
-      container.innerHTML='';
-      const saved = snapshot.val()||[]; saved.length ? saved.forEach(i=>container.appendChild(createInventorySection(i))) : container.appendChild(createInventorySection());
-    });
-    btn.addEventListener('click',()=>{ container.appendChild(createInventorySection()); saveInventory(); });
-  }
-  else if(tab==='background'){
-    document.querySelectorAll('#tabContent input,#tabContent textarea').forEach(el=>{
-      onValue(ref(db,'background/'+el.id), snapshot=>{ el.value = snapshot.val()||''; });
-      el.addEventListener('input',()=>saveBackground());
+  if(tab==='background'){
+    const fields = ['bgName','bgRace','bgClass','bgGender','bgSize','bgHeight','bgFaith','bgAge','bgWeight','bgLanguages','bgBackstory'];
+    fields.forEach(async id=>{
+      const val = await loadField(id);
+      const el=document.getElementById('backgroundContainer').querySelector('#'+id);
+      if(el) el.value=val;
+      if(el) el.addEventListener('input',()=>saveField(id,el.value));
     });
   }
 }
 
-tabButtons.forEach(btn=>btn.addEventListener('click',()=>switchTab(btn.dataset.tab)));
+// --- Save tab data ---
+function saveTabData(tab){
+  const container=document.getElementById(tab+'Container');
+  const data = Array.from(container.querySelectorAll('.action-section')).map(div=>{
+    const inputs = div.querySelectorAll('input');
+    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
+  });
+  set(ref(db, tab), data);
+}
+
+function saveInventory(){
+  const container=document.getElementById('inventoryContainer');
+  const data = Array.from(container.querySelectorAll('.inventory-grid')).map(div=>{
+    const inputs=div.querySelectorAll('input');
+    return {quantity:inputs[0].value,name:inputs[1].value,description:inputs[2].value};
+  });
+  set(ref(db,'inventory'),data);
+}
+
+// --- Buttons ---
+document.getElementById('addActionBtn').addEventListener('click',()=>{
+  const container=document.getElementById('actionsContainer');
+  container.appendChild(createActionElement({},()=>saveTabData('actions')));
+});
+document.getElementById('addSpellBtn').addEventListener('click',()=>{
+  const container=document.getElementById('spellsContainer');
+  container.appendChild(createActionElement({},()=>saveTabData('spells')));
+});
+document.getElementById('addInventoryBtn').addEventListener('click',()=>{
+  const container=document.getElementById('inventoryContainer');
+  container.appendChild(createInventoryElement({}));
+});
 </script>
 </body>
 </html>
