@@ -346,24 +346,33 @@ function switchTab(tab){
   document.querySelector(`.tab-btn[data-tab="${tab}"]`).classList.add('active');
 
   if(tab==='actions'){
-    const container=document.getElementById('actionsContainer');
-    const btn=document.getElementById('addActionBtn');
-    onValue(ref(db,'actions'),snap=>{container.innerHTML=''; (snap.val()||[{}]).forEach(a=>container.appendChild(createActionSection(a))); });
-    btn.addEventListener('click',()=>{container.appendChild(createActionSection()); saveActions();});
-  } else if(tab==='spells'){
-    const container=document.getElementById('spellsContainer');
-    const btn=document.getElementById('addSpellBtn');
-    onValue(ref(db,'spells'),snap=>{container.innerHTML=''; (snap.val()||[{}]).forEach(s=>container.appendChild(createSpellSection(s))); });
-    btn.addEventListener('click',()=>{container.appendChild(createSpellSection()); saveSpells();});
-  } else if(tab==='inventory'){
-    const container=document.getElementById('inventoryContainer');
-    const btn=document.getElementById('addInventoryBtn');
-    onValue(ref(db,'inventory'),snap=>{container.innerHTML=''; (snap.val()||[{}]).forEach(i=>container.appendChild(createInventorySection(i))); });
-    btn.addEventListener('click',()=>{container.appendChild(createInventorySection()); saveInventory();});
-  } else if(tab==='background'){
+    const container = document.getElementById('actionsContainer'); const btn = document.getElementById('addActionBtn');
+    onValue(ref(db,'actions'), snapshot => {
+      container.innerHTML='';
+      const saved = snapshot.val()||[]; saved.length ? saved.forEach(a=>container.appendChild(createActionSection(a))) : container.appendChild(createActionSection());
+    });
+    btn.addEventListener('click',()=>{ container.appendChild(createActionSection()); saveActions(); });
+  }
+  else if(tab==='spells'){
+    const container = document.getElementById('spellsContainer'); const btn = document.getElementById('addSpellBtn');
+    onValue(ref(db,'spells'), snapshot => {
+      container.innerHTML='';
+      const saved = snapshot.val()||[]; saved.length ? saved.forEach(s=>container.appendChild(createSpellSection(s))) : container.appendChild(createSpellSection());
+    });
+    btn.addEventListener('click',()=>{ container.appendChild(createSpellSection()); saveSpells(); });
+  }
+  else if(tab==='inventory'){
+    const container = document.getElementById('inventoryContainer'); const btn = document.getElementById('addInventoryBtn');
+    onValue(ref(db,'inventory'), snapshot => {
+      container.innerHTML='';
+      const saved = snapshot.val()||[]; saved.length ? saved.forEach(i=>container.appendChild(createInventorySection(i))) : container.appendChild(createInventorySection());
+    });
+    btn.addEventListener('click',()=>{ container.appendChild(createInventorySection()); saveInventory(); });
+  }
+  else if(tab==='background'){
     document.querySelectorAll('#tabContent input,#tabContent textarea').forEach(el=>{
-      onValue(ref(db,'background/'+el.id),snap=>{el.value=snap.val()||'';});
-      el.addEventListener('input',()=>{set(ref(db,'background/'+el.id), el.value);});
+      onValue(ref(db,'background/'+el.id), snapshot=>{ el.value = snapshot.val()||''; });
+      el.addEventListener('input',()=>saveBackground());
     });
   }
 }
