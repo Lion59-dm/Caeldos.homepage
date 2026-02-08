@@ -270,9 +270,12 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// 🔹 SITE_PATH for separate sites
+const SITE_PATH = 'site1'; // change to 'site2' for second website
+
 // Helpers
-function saveField(id, value){ set(ref(db,'fields/'+id), value); }
-async function loadField(id){ const snap = await get(child(ref(db), 'fields/'+id)); return snap.exists() ? snap.val() : ''; }
+function saveField(id, value){ set(ref(db, SITE_PATH + '/fields/' + id), value); }
+async function loadField(id){ const snap = await get(child(ref(db), SITE_PATH + '/fields/' + id)); return snap.exists() ? snap.val() : ''; }
 
 // Wallpaper
 const wallpaperSelect=document.getElementById('wallpaperSelect');
@@ -282,7 +285,6 @@ const nextButton=document.getElementById('nextWallpaper');
 let currentWallpaperIndex=0;
 
 window.addEventListener('load', async ()=>{
-  // wallpaper
   const savedWallpaper=await loadField('wallpaper');
   if(savedWallpaper && wallpapers.includes(savedWallpaper)){
     document.body.style.backgroundImage=`url(${savedWallpaper})`;
@@ -291,13 +293,11 @@ window.addEventListener('load', async ()=>{
   } else {
     document.body.style.backgroundImage=`url(${wallpapers[0]})`;
   }
-  // stats
   document.querySelectorAll('.left-panel input').forEach(async input=>{
     const val=await loadField(input.id);
     if(val) input.value=val;
     input.addEventListener('input',()=>saveField(input.id,input.value));
   });
-  // tabs
   ['actions','spells','inventory','background'].forEach(loadTabData);
 });
 
@@ -357,13 +357,13 @@ function createInventoryElement(item){
 // Load tab data
 async function loadTabData(tab){
   if(tab==='actions' || tab==='spells'){
-    const snap=await get(child(ref(db),tab));
+    const snap=await get(child(ref(db), SITE_PATH + '/' + tab));
     const container=document.getElementById(tab+'Container'); container.innerHTML='';
     const data=snap.exists()?snap.val():[];
     (data.length?data:[{}]).forEach(d=>container.appendChild(createActionElement(d,()=>saveTabData(tab))));
   }
   if(tab==='inventory'){
-    const snap=await get(child(ref(db),'inventory'));
+    const snap=await get(child(ref(db), SITE_PATH + '/inventory'));
     const container=document.getElementById('inventoryContainer'); container.innerHTML='';
     const data=snap.exists()?snap.val():[];
     (data.length?data:[{}]).forEach(d=>container.appendChild(createInventoryElement(d)));
@@ -371,7 +371,7 @@ async function loadTabData(tab){
   if(tab==='background'){
     const fields=['bgName','bgRace','bgClass','bgGender','bgSize','bgHeight','bgFaith','bgAge','bgWeight','bgLanguages','bgBackstory'];
     for(const id of fields){
-      const val=await loadField(id);
+      const val=await get(child(ref(db), SITE_PATH + '/fields/' + id)).then(snap=>snap.exists()?snap.val():'');
       const el=document.getElementById(id);
       if(el) el.value=val;
       if(el) el.addEventListener('input',()=>saveField(id,el.value));
@@ -386,7 +386,7 @@ function saveTabData(tab){
     const inputs=div.querySelectorAll('input');
     return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
   });
-  set(ref(db,tab),data);
+  set(ref(db, SITE_PATH + '/' + tab), data);
 }
 function saveInventory(){
   const container=document.getElementById('inventoryContainer');
@@ -394,7 +394,7 @@ function saveInventory(){
     const inputs=div.querySelectorAll('input');
     return {quantity:inputs[0].value,name:inputs[1].value,description:inputs[2].value};
   });
-  set(ref(db,'inventory'),data);
+  set(ref(db, SITE_PATH + '/inventory'), data);
 }
 
 // Add buttons
@@ -402,6 +402,6 @@ document.getElementById('addActionBtn').addEventListener('click',()=>{document.g
 document.getElementById('addSpellBtn').addEventListener('click',()=>{document.getElementById('spellsContainer').appendChild(createActionElement({},()=>saveTabData('spells')));});
 document.getElementById('addInventoryBtn').addEventListener('click',()=>{document.getElementById('inventoryContainer').appendChild(createInventoryElement({}));});
 </script>
+
 </body>
 </html>
-
