@@ -100,27 +100,9 @@ textarea { resize: vertical; }
 .wallpaper-buttons button:hover { background: rgba(255,255,255,0.4); }
 .bg-fields { flex: 0 0 auto; display: flex; flex-direction: column; gap: 10px; }
 .bg-backstory { flex: 1; margin-top: 10px; }
-
-#actionsContainer, #spellsContainer, #inventoryContainer, #backgroundContainer {
-  flex: 1;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.action-section {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-}
-
-.action-section input {
-  flex: 1;
-  min-width: 0;
-  cursor: pointer;
-}
-
+#actionsContainer, #spellsContainer, #inventoryContainer, #backgroundContainer { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+.action-section { display: flex; gap: 6px; align-items: center; transition: height 0.18s ease; }
+.action-section input { flex: 1; min-width: 0; cursor: pointer; }
 .delete-action-btn {
   flex: 0 0 60px;
   background: rgba(255,0,0,0.5);
@@ -131,7 +113,6 @@ textarea { resize: vertical; }
   padding: 4px 8px;
 }
 .delete-action-btn:hover { background: rgba(255,0,0,0.8); }
-
 #addActionBtn, #addSpellBtn, #addInventoryBtn {
   margin-top: 10px;
   padding: 6px;
@@ -141,22 +122,13 @@ textarea { resize: vertical; }
   color: #fff;
   cursor: pointer;
 }
-#addActionBtn:hover, #addSpellBtn:hover, #addInventoryBtn:hover {
-  background: rgba(255,255,255,0.4);
-}
-
-.inventory-grid {
-  display:flex;
-  gap:6px;
-  align-items:center;
-}
-.inventory-grid input {
-  flex:1;
-  min-width:0;
-}
+#addActionBtn:hover, #addSpellBtn:hover, #addInventoryBtn:hover { background: rgba(255,255,255,0.4); }
+.action-headers { display: flex; gap: 10px; font-weight: bold; margin-bottom: 4px; }
+.action-headers div { flex: 1; padding-right: 6px; text-align:center; }
+.inventory-grid { display:flex; gap:6px; align-items:center; }
+.inventory-grid input { flex:1; min-width:0; }
 </style>
 </head>
-
 <body>
 
 <div class="left-panel">
@@ -165,6 +137,7 @@ textarea { resize: vertical; }
     D&D Character Sheet
   </h1>
 
+  <!-- Stats -->
   <div class="stats-row">
     <div><label>HP</label><input id="hp" type="number"></div>
     <div><label>AC</label><input id="ac" type="number"></div>
@@ -180,10 +153,31 @@ textarea { resize: vertical; }
     <div><label>WIS</label><input id="wisdom"></div>
     <div><label>CHA</label><input id="charisma"></div>
   </div>
+
+  <div class="stats-list">
+    <div class="stats-row"><label>Acrobatics</label><input id="acrobatics"></div>
+    <div class="stats-row"><label>Animal Handling</label><input id="animalHandling"></div>
+    <div class="stats-row"><label>Arcana</label><input id="arcana"></div>
+    <div class="stats-row"><label>Athletics</label><input id="athletics"></div>
+    <div class="stats-row"><label>Deception</label><input id="deception"></div>
+    <div class="stats-row"><label>History</label><input id="history"></div>
+    <div class="stats-row"><label>Insight</label><input id="insight"></div>
+    <div class="stats-row"><label>Intimidation</label><input id="intimidation"></div>
+    <div class="stats-row"><label>Investigation</label><input id="investigation"></div>
+    <div class="stats-row"><label>Medicine</label><input id="medicine"></div>
+    <div class="stats-row"><label>Nature</label><input id="nature"></div>
+    <div class="stats-row"><label>Perception</label><input id="perception"></div>
+    <div class="stats-row"><label>Performance</label><input id="performance"></div>
+    <div class="stats-row"><label>Persuasion</label><input id="persuasion"></div>
+    <div class="stats-row"><label>Religion</label><input id="religion"></div>
+    <div class="stats-row"><label>Sleight of Hand</label><input id="sleightOfHand"></div>
+    <div class="stats-row"><label>Stealth</label><input id="stealth"></div>
+    <div class="stats-row"><label>Survival</label><input id="survival"></div>
+    <div class="stats-row"><label>Hunger</label><input id="hunger"></div>
+  </div>
 </div>
 
 <div class="right-panel">
-
   <div class="tab-buttons">
     <button class="tab-btn active" data-tab="actions">Actions</button>
     <button class="tab-btn" data-tab="spells">Spells</button>
@@ -191,38 +185,71 @@ textarea { resize: vertical; }
     <button class="tab-btn" data-tab="background">Background</button>
   </div>
 
+  <!-- Tab containers -->
   <div class="tab-content">
-
     <div id="actionsContainer"></div>
-    <button id="addActionBtn">+ Add Action</button>
-
     <div id="spellsContainer" style="display:none;"></div>
-    <button id="addSpellBtn" style="display:none;">+ Add Spell</button>
-
     <div id="inventoryContainer" style="display:none;"></div>
-    <button id="addInventoryBtn" style="display:none;">+ Add Item</button>
-
     <div id="backgroundContainer" style="display:none; flex-direction:column; gap:10px; overflow-y:auto;">
       <div class="bg-fields">
         <div class="stats-row">
           <div><label>Name</label><input id="bgName"></div>
           <div><label>Race</label><input id="bgRace"></div>
         </div>
+        <div class="stats-row">
+          <div><label>Class</label><input id="bgClass"></div>
+          <div><label>Gender</label><input id="bgGender"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Size</label><input id="bgSize"></div>
+          <div><label>Height</label><input id="bgHeight"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Faith</label><input id="bgFaith"></div>
+          <div><label>Age</label><input id="bgAge"></div>
+        </div>
+        <div class="stats-row">
+          <div><label>Weight</label><input id="bgWeight"></div>
+          <div><label>Languages</label><input id="bgLanguages"></div>
+        </div>
       </div>
       <div class="bg-backstory">
         <label>Backstory</label>
-        <textarea id="bgBackstory" style="width:100%;height:150px;"></textarea>
+        <textarea id="bgBackstory" placeholder="Enter your backstory..." style="width:100%;height:150px;"></textarea>
       </div>
     </div>
-
   </div>
 
+  <!-- Wallpaper section -->
+  <div class="section">
+    <label><b>Background Wallpaper</b></label>
+    <select id="wallpaperSelect">
+      <option value="./Images/Img1.webp">Arcane accident</option>
+      <option value="./Images/Img2.avif">Sorceror's training</option>
+      <option value="./Images/Img3.jpg">Barbarian's carnage</option>
+      <option value="./Images/Img4.jpg">The long ride</option>
+      <option value="./Images/Img5.webp">Death of darkness</option>
+      <option value="./Images/Img6.jpg">Ceaseless rage</option>
+      <option value="./Images/Img7.avif">The white shadow</option>
+      <option value="./Images/Img8.webp">The broken</option>
+      <option value="./Images/Img9.jpg">The silent rain</option>
+      <option value="./Images/Img10.jpg">Siege</option>
+      <option value="./Images/Img11.jpg">The unwary</option>
+      <option value="./Images/Img12.jpg">The league of assassins</option>
+    </select>
+    <div class="wallpaper-buttons">
+      <button id="prevWallpaper">Previous</button>
+      <button id="nextWallpaper">Next</button>
+    </div>
+  </div>
 </div>
 
+<!-- Firebase SDK -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-app.js";
 import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.6.0/firebase-database.js";
 
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyDMeSWp-UbFv_jYstUhbB1kkP-Ite-IHM8",
   authDomain: "dnd-caeldos.firebaseapp.com",
@@ -232,124 +259,132 @@ const firebaseConfig = {
   messagingSenderId: "940131839058",
   appId: "1:940131839058:web:2484beb5ffad8fcfd3438b"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
+// Helpers
 function saveField(id, value){ set(ref(db,'fields/'+id), value); }
-async function loadField(id){
-  const snap = await get(child(ref(db), 'fields/'+id));
-  return snap.exists() ? snap.val() : '';
-}
+async function loadField(id){ const snap = await get(child(ref(db), 'fields/'+id)); return snap.exists() ? snap.val() : ''; }
 
+// Wallpaper
+const wallpaperSelect=document.getElementById('wallpaperSelect');
+const wallpapers=Array.from(wallpaperSelect.options).map(o=>o.value);
+const prevButton=document.getElementById('prevWallpaper');
+const nextButton=document.getElementById('nextWallpaper');
+let currentWallpaperIndex=0;
+
+window.addEventListener('load', async ()=>{
+  // wallpaper
+  const savedWallpaper=await loadField('wallpaper');
+  if(savedWallpaper && wallpapers.includes(savedWallpaper)){
+    document.body.style.backgroundImage=`url(${savedWallpaper})`;
+    wallpaperSelect.value=savedWallpaper;
+    currentWallpaperIndex=wallpapers.indexOf(savedWallpaper);
+  } else {
+    document.body.style.backgroundImage=`url(${wallpapers[0]})`;
+  }
+  // stats
+  document.querySelectorAll('.left-panel input').forEach(async input=>{
+    const val=await loadField(input.id);
+    if(val) input.value=val;
+    input.addEventListener('input',()=>saveField(input.id,input.value));
+  });
+  // tabs
+  ['actions','spells','inventory','background'].forEach(loadTabData);
+});
+
+// wallpaper buttons
+wallpaperSelect.addEventListener('change',()=>updateWallpaper(wallpaperSelect.value));
+prevButton.addEventListener('click',()=>nextWallpaper(-1));
+nextButton.addEventListener('click',()=>nextWallpaper(1));
+function updateWallpaper(value){ document.body.style.backgroundImage=`url(${value})`; saveField('wallpaper',value); currentWallpaperIndex=wallpapers.indexOf(value);}
+function nextWallpaper(delta){ currentWallpaperIndex=(currentWallpaperIndex+delta+wallpapers.length)%wallpapers.length; updateWallpaper(wallpapers[currentWallpaperIndex]);}
+
+// Tabs
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll(
-      '#actionsContainer,#spellsContainer,#inventoryContainer,#backgroundContainer,'+
-      '#addActionBtn,#addSpellBtn,#addInventoryBtn'
-    ).forEach(d=>d.style.display='none');
-
+    document.querySelectorAll('#actionsContainer,#spellsContainer,#inventoryContainer,#backgroundContainer').forEach(d=>d.style.display='none');
     document.getElementById(btn.dataset.tab+'Container').style.display='flex';
-
-    document.getElementById("addActionBtn").style.display="none";
-    document.getElementById("addSpellBtn").style.display="none";
-    document.getElementById("addInventoryBtn").style.display="none";
-
-    if(btn.dataset.tab==="actions") document.getElementById("addActionBtn").style.display="block";
-    if(btn.dataset.tab==="spells") document.getElementById("addSpellBtn").style.display="block";
-    if(btn.dataset.tab==="inventory") document.getElementById("addInventoryBtn").style.display="block";
-
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
   });
 });
 
+// Actions/Spells/Inventory
 function createActionElement(data, saveFunc){
-  const div=document.createElement('div');
-  div.classList.add('action-section');
-
+  const div=document.createElement('div'); div.classList.add('action-section');
   ['name','range','hit','type','damage','notes'].forEach((f,i)=>{
     const input=document.createElement('input');
-    input.value=data[f]||'';
-    input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
-    input.addEventListener('input',saveFunc);
+    input.value=data[f]||''; input.placeholder=['Name','Range','Hit','Damage type','Damage','Notes'][i];
+    input.addEventListener('input',()=>saveFunc());
     div.appendChild(input);
   });
-
-  const del=document.createElement('button');
-  del.textContent='Delete';
-  del.className='delete-action-btn';
-  del.onclick=()=>{div.remove(); saveFunc();};
+  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
+  del.addEventListener('click',()=>{div.remove(); saveFunc();});
   div.appendChild(del);
-
   return div;
 }
-
 function createInventoryElement(item){
-  const div=document.createElement('div');
-  div.classList.add('inventory-grid');
-
+  const div=document.createElement('div'); div.classList.add('inventory-grid');
   ['quantity','name','description'].forEach(f=>{
     const input=document.createElement('input');
-    input.value=item[f]||'';
-    input.placeholder=f;
+    input.value=item[f]||''; input.placeholder=f.charAt(0).toUpperCase()+f.slice(1);
     input.addEventListener('input',saveInventory);
     div.appendChild(input);
   });
-
-  const del=document.createElement('button');
-  del.textContent='Delete';
-  del.className='delete-action-btn';
-  del.onclick=()=>{div.remove(); saveInventory();};
+  const del=document.createElement('button'); del.textContent='Delete'; del.className='delete-action-btn';
+  del.addEventListener('click',()=>{div.remove(); saveInventory();});
   div.appendChild(del);
-
   return div;
 }
 
+// Load tab data
+async function loadTabData(tab){
+  if(tab==='actions' || tab==='spells'){
+    const snap=await get(child(ref(db),tab));
+    const container=document.getElementById(tab+'Container'); container.innerHTML='';
+    const data=snap.exists()?snap.val():[];
+    (data.length?data:[{}]).forEach(d=>container.appendChild(createActionElement(d,()=>saveTabData(tab))));
+  }
+  if(tab==='inventory'){
+    const snap=await get(child(ref(db),'inventory'));
+    const container=document.getElementById('inventoryContainer'); container.innerHTML='';
+    const data=snap.exists()?snap.val():[];
+    (data.length?data:[{}]).forEach(d=>container.appendChild(createInventoryElement(d)));
+  }
+  if(tab==='background'){
+    const fields=['bgName','bgRace','bgClass','bgGender','bgSize','bgHeight','bgFaith','bgAge','bgWeight','bgLanguages','bgBackstory'];
+    for(const id of fields){
+      const val=await loadField(id);
+      const el=document.getElementById(id);
+      if(el) el.value=val;
+      if(el) el.addEventListener('input',()=>saveField(id,el.value));
+    }
+  }
+}
+
+// Save tab data
 function saveTabData(tab){
   const container=document.getElementById(tab+'Container');
   const data=Array.from(container.querySelectorAll('.action-section')).map(div=>{
     const inputs=div.querySelectorAll('input');
-    return {
-      name:inputs[0].value,
-      range:inputs[1].value,
-      hit:inputs[2].value,
-      type:inputs[3].value,
-      damage:inputs[4].value,
-      notes:inputs[5].value
-    };
+    return {name:inputs[0].value,range:inputs[1].value,hit:inputs[2].value,type:inputs[3].value,damage:inputs[4].value,notes:inputs[5].value};
   });
   set(ref(db,tab),data);
 }
-
 function saveInventory(){
   const container=document.getElementById('inventoryContainer');
   const data=Array.from(container.querySelectorAll('.inventory-grid')).map(div=>{
     const inputs=div.querySelectorAll('input');
-    return {
-      quantity:inputs[0].value,
-      name:inputs[1].value,
-      description:inputs[2].value
-    };
+    return {quantity:inputs[0].value,name:inputs[1].value,description:inputs[2].value};
   });
   set(ref(db,'inventory'),data);
 }
 
-document.getElementById('addActionBtn').onclick=()=>{
-  document.getElementById('actionsContainer')
-    .appendChild(createActionElement({},()=>saveTabData("actions")));
-};
-
-document.getElementById('addSpellBtn').onclick=()=>{
-  document.getElementById('spellsContainer')
-    .appendChild(createActionElement({},()=>saveTabData("spells")));
-};
-
-document.getElementById('addInventoryBtn').onclick=()=>{
-  document.getElementById('inventoryContainer')
-    .appendChild(createInventoryElement({}));
-};
+// Add buttons
+document.getElementById('addActionBtn').addEventListener('click',()=>{document.getElementById('actionsContainer').appendChild(createActionElement({},()=>saveTabData('actions')));});
+document.getElementById('addSpellBtn').addEventListener('click',()=>{document.getElementById('spellsContainer').appendChild(createActionElement({},()=>saveTabData('spells')));});
+document.getElementById('addInventoryBtn').addEventListener('click',()=>{document.getElementById('inventoryContainer').appendChild(createInventoryElement({}));});
 </script>
-
 </body>
 </html>
