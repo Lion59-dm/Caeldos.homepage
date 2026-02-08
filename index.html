@@ -187,10 +187,18 @@ textarea { resize: vertical; }
 
   <!-- Tab containers -->
   <div class="tab-content">
+  
     <div id="actionsContainer"></div>
+    <button id="addActionBtn">+ Add Action</button>
+  
     <div id="spellsContainer" style="display:none;"></div>
+    <button id="addSpellBtn" style="display:none;">+ Add Spell</button>
+  
     <div id="inventoryContainer" style="display:none;"></div>
+    <button id="addInventoryBtn" style="display:none;">+ Add Item</button>
+  
     <div id="backgroundContainer" style="display:none; flex-direction:column; gap:10px; overflow-y:auto;">
+
       <div class="bg-fields">
         <div class="stats-row">
           <div><label>Name</label><input id="bgName"></div>
@@ -303,8 +311,16 @@ function nextWallpaper(delta){ currentWallpaperIndex=(currentWallpaperIndex+delt
 // Tabs
 document.querySelectorAll('.tab-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
-    document.querySelectorAll('#actionsContainer,#spellsContainer,#inventoryContainer,#backgroundContainer').forEach(d=>d.style.display='none');
+    document.querySelectorAll(
+      '#actionsContainer,#spellsContainer,#inventoryContainer,#backgroundContainer,' +
+      '#addActionBtn,#addSpellBtn,#addInventoryBtn'
+    ).forEach(d=>d.style.display='none');
+    
     document.getElementById(btn.dataset.tab+'Container').style.display='flex';
+    
+    if(btn.dataset.tab==='actions') document.getElementById('addActionBtn').style.display='block';
+    if(btn.dataset.tab==='spells') document.getElementById('addSpellBtn').style.display='block';
+    if(btn.dataset.tab==='inventory') document.getElementById('addInventoryBtn').style.display='block';
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
     btn.classList.add('active');
   });
@@ -388,3 +404,4 @@ document.getElementById('addInventoryBtn').addEventListener('click',()=>{documen
 </script>
 </body>
 </html>
+
